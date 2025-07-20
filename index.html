@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <!-- custom css file link  -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo time(); ?>">
 
 </head>
 <body>
@@ -31,7 +31,26 @@
         <a href="#price">precios</a>
         <a href="#review">reseñas</a>
         <a href="#contact">contacto</a>
+        
+        <!-- Botones de autenticación para móvil -->
+        <div class="mobile-auth-buttons">
+            <a href="login.html" class="btn-auth login-btn">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </a>
+            <a href="register.html" class="btn-auth register-btn">
+                <i class="fas fa-user-plus"></i> Registrarse
+            </a>
+        </div>
     </nav>
+
+    <div class="auth-buttons">
+        <a href="login.html" class="btn-auth login-btn">
+            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+        </a>
+        <a href="register.html" class="btn-auth register-btn">
+            <i class="fas fa-user-plus"></i> Registrarse
+        </a>
+    </div>
 
     <div id="menu-bars" class="fas fa-bars"></div>
 
@@ -45,7 +64,7 @@
 
     <div class="content">
         <h3>¡Es hora de celebrar! Los mejores <span> organizadores de eventos </span></h3>
-        <a href="#" class="btn">contáctanos</a>
+        <a href="register.html" class="btn">comenzar ahora</a>
     </div>
 
     <div class="swiper-container home-slider">
@@ -129,7 +148,7 @@
         <h3>Te brindaremos una celebración muy especial</h3>
         <p>Somos expertos en la organización de eventos únicos e inolvidables. Con años de experiencia en el sector, nos especializamos en crear momentos mágicos que perdurarán en tu memoria para siempre. Nuestro equipo profesional se encarga de cada detalle.</p>
         <p>Desde bodas elegantes hasta fiestas de cumpleaños, conciertos y eventos corporativos, transformamos tus ideas en realidad con creatividad, pasión y dedicación absoluta.</p>
-        <a href="#" class="btn">contáctanos</a>
+        <a href="register.html" class="btn">¡Crea tu evento!</a>
     </div>
 
 </div>
@@ -419,7 +438,7 @@
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
 <!-- custom js file link  -->
-<script src="js/script.js"></script>
+<script src="js/script.js?v=<?php echo time(); ?>"></script>
 
 </body>
 </html>

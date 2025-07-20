@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Gestor de Eventos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .register-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 0;
+        }
+
+        .register-form {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            margin: 0 1rem;
+        }
+
+        .register-form h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .password-requirements {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .password-requirements ul {
+            margin: 0.5rem 0 0 1rem;
+            padding: 0;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <form class="register-form" id="registerForm">
+            <h2><i class="fas fa-user-plus"></i> Registro</h2>
+            
+            <div class="alert alert-error" id="errorAlert"></div>
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="loading" id="loadingIndicator">
+                <i class="fas fa-spinner fa-spin"></i> Registrando usuario...
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">
+                    <i class="fas fa-user"></i> Nombre completo *
+                </label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope"></i> Email *
+                </label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">
+                    <i class="fas fa-phone"></i> Teléfono
+                </label>
+                <input type="tel" id="telefono" name="telefono" placeholder="Ej: +1234567890">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Contraseña *
+                    </label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">
+                        <i class="fas fa-lock"></i> Confirmar *
+                    </label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+            </div>
+
+            <div class="password-requirements">
+                <strong>Requisitos de contraseña:</strong>
+                <ul>
+                    <li>Mínimo 6 caracteres</li>
+                    <li>Las contraseñas deben coincidir</li>
+                </ul>
+            </div>
+
+            <button type="submit" class="btn-register" id="submitBtn">
+                <i class="fas fa-user-plus"></i> Crear Cuenta
+            </button>
+
+            <div class="links">
+                <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
+                <br><br>
+                <a href="index.html">← Volver al inicio</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorAlert = document.getElementById('errorAlert');
+            const successAlert = document.getElementById('successAlert');
+            
+            // Resetear alertas
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'none';
+            
+            // Validar contraseñas
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                errorAlert.textContent = 'Las contraseñas no coinciden';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorAlert.textContent = 'La contraseña debe tener al menos 6 caracteres';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // Mostrar loading
+            submitBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+            
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                password: password,
+                confirm_password: confirmPassword
+            };
+
+            try {
+                const response = await fetch('backend/auth/register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    successAlert.textContent = data.message + ' Serás redirigido al login...';
+                    successAlert.style.display = 'block';
+                    
+                    // Redirigir después de un momento
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || 'Error en el registro');
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
+            }
+        });
+
+        // Validación en tiempo real de contraseñas
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.style.borderColor = '#dc3545';
+            } else {
+                this.style.borderColor = '#e1e1e1';
+            }
+        });
+    </script>
+</body>
+</html>

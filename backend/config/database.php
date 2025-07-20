@@ -1,21 +1,40 @@
 <?php
 class Database {
     private $host = 'localhost';
-    private $db_name = 'gestor_eventos';
-    private $username = 'root';
-    private $password = '';
-    private $conn;
+    private $database = 'eventos';
+    private $username = 'postgres';
+    private $password = 'luis123'; // Cambiar por tu contraseña de PostgreSQL
+    private $port = '5432';
+    private $connection;
 
-    public function connect() {
-        $this->conn = null;
+    public function __construct() {
         try {
-            $this->conn = new PDO('mysql:host=' . $this->host . ';dbname=' . $this->db_name, 
-                                  $this->username, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->database}";
+            $this->connection = new PDO(
+                $dsn,
+                $this->username,
+                $this->password,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ]
+            );
         } catch(PDOException $e) {
-            echo 'Error de conexión: ' . $e->getMessage();
+            die("Error de conexión a PostgreSQL: " . $e->getMessage());
         }
-        return $this->conn;
+    }
+
+    public function getConnection() {
+        return $this->connection;
+    }
+
+    public function prepare($sql) {
+        return $this->connection->prepare($sql);
+    }
+
+    public function lastInsertId($sequence = null) {
+        return $this->connection->lastInsertId($sequence);
     }
 }
 ?>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Empleado - Gestor de Eventos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2rem 1rem;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 1rem;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar nav ul li a:hover,
+        .sidebar nav ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .user-info {
+            margin-left: auto;
+        }
+
+        .section {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .events-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .event-card {
+            border: 1px solid #e1e1e1;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .event-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pendiente { background: #fff3cd; color: #856404; }
+        .status-confirmado { background: #d1ecf1; color: #0c5460; }
+        .status-en_progreso { background: #d4edda; color: #155724; }
+        .status-completado { background: #d4edda; color: #155724; }
+        .status-cancelado { background: #f8d7da; color: #721c24; }
+
+        .event-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .followup-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #28a745;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .followup-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .event-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2><i class="fas fa-tasks"></i> Panel Empleado</h2>
+            
+            <nav>
+                <ul>
+                    <li><a href="#" onclick="showSection('dashboard')" class="active">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a></li>
+                    <li><a href="#" onclick="showSection('my-events')">
+                        <i class="fas fa-calendar-check"></i> Eventos Asignados
+                    </a></li>
+                    <li><a href="#" onclick="showSection('pending-events')">
+                        <i class="fas fa-clock"></i> Pendientes
+                    </a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-info">
+                <p><strong id="userName">Empleado</strong></p>
+                <p><small id="userEmail">empleado@ejemplo.com</small></p>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1>Panel de Control - Empleado</h1>
+            </div>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <h2>Resumen de Trabajo</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalAssignedEvents">0</h3>
+                        <p>Eventos Asignados</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="pendingEvents">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="inProgressEvents">0</h3>
+                        <p>En Progreso</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="completedEvents">0</h3>
+                        <p>Completados</p>
+                    </div>
+                </div>
+
+                <h3>Próximos Eventos</h3>
+                <div id="upcomingEvents" class="events-grid"></div>
+            </section>
+
+            <!-- My Events Section -->
+            <section id="my-events" class="section">
+                <h2>Todos mis Eventos Asignados</h2>
+                
+                <div id="assignedEventsList" class="events-grid"></div>
+            </section>
+
+            <!-- Pending Events Section -->
+            <section id="pending-events" class="section">
+                <h2>Eventos Pendientes por Procesar</h2>
+                
+                <div id="pendingEventsList" class="events-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para detalles del evento -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles del Evento</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="eventDetails"></div>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar estado -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cambiar Estado del Evento</h2>
+                <span class="close" onclick="closeStatusModal()">&times;</span>
+            </div>
+            
+            <div class="alert alert-success" id="statusSuccess"></div>
+            <div class="alert alert-error" id="statusError"></div>
+            
+            <form id="statusForm">
+                <input type="hidden" id="statusEventId">
+                
+                <div class="form-group">
+                    <label for="newStatus">Nuevo Estado:</label>
+                    <select id="newStatus" required>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="en_progreso">En Progreso</option>
+                        <option value="completado">Completado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="statusComment">Comentario (opcional):</label>
+                    <textarea id="statusComment" rows="3" placeholder="Agregar comentario sobre el cambio de estado..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Actualizar Estado
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para agregar seguimiento -->
+    <div id="followupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Agregar Seguimiento</h2>
+                <span class="close" onclick="closeFollowupModal()">&times;</span>
+            </div>
+            
+            <div class="alert alert-success" id="followupSuccess"></div>
+            <div class="alert alert-error" id="followupError"></div>
+            
+            <form id="followupForm">
+                <input type="hidden" id="followupEventId">
+                
+                <div class="form-group">
+                    <label for="followupType">Tipo:</label>
+                    <select id="followupType" required>
+                        <option value="comentario">Comentario General</option>
+                        <option value="problema">Problema Reportado</option>
+                        <option value="pago">Relacionado con Pago</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="followupComment">Comentario:</label>
+                    <textarea id="followupComment" rows="4" required placeholder="Describe el seguimiento..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-plus"></i> Agregar Seguimiento
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let events = [];
+
+        // Verificar autenticación al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Verificar que sea un empleado
+            if (currentUser.rol_id !== 2) {
+                alert('Acceso denegado. Esta página es solo para empleados.');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Actualizar información del usuario en la UI
+            document.getElementById('userName').textContent = currentUser.nombre;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            
+            // Cargar datos iniciales
+            loadEvents();
+        });
+
+        function showSection(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Actualizar navegación activa
+            document.querySelectorAll('.sidebar nav a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Cargar datos específicos de la sección
+            if (sectionId === 'my-events' || sectionId === 'pending-events') {
+                loadEvents();
+            }
+        }
+
+        async function loadEvents() {
+            try {
+                const response = await fetch('backend/api/events.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    events = data.data;
+                    updateDashboardStats();
+                    displayAssignedEvents();
+                    displayPendingEvents();
+                    displayUpcomingEvents();
+                } else {
+                    console.error('Error loading events:', data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function updateDashboardStats() {
+            const totalEvents = events.length;
+            const pendingEvents = events.filter(e => e.estado === 'confirmado').length;
+            const inProgressEvents = events.filter(e => e.estado === 'en_progreso').length;
+            const completedEvents = events.filter(e => e.estado === 'completado').length;
+            
+            document.getElementById('totalAssignedEvents').textContent = totalEvents;
+            document.getElementById('pendingEvents').textContent = pendingEvents;
+            document.getElementById('inProgressEvents').textContent = inProgressEvents;
+            document.getElementById('completedEvents').textContent = completedEvents;
+        }
+
+        function displayAssignedEvents() {
+            const container = document.getElementById('assignedEventsList');
+            container.innerHTML = '';
+            
+            if (events.length === 0) {
+                container.innerHTML = '<p>No tienes eventos asignados aún.</p>';
+                return;
+            }
+            
+            events.forEach(event => {
+                const eventCard = createEmployeeEventCard(event);
+                container.appendChild(eventCard);
+            });
+        }
+
+        function displayPendingEvents() {
+            const container = document.getElementById('pendingEventsList');
+            container.innerHTML = '';
+            
+            const pendingEvents = events.filter(e => e.estado === 'confirmado');
+            
+            if (pendingEvents.length === 0) {
+                container.innerHTML = '<p>No hay eventos pendientes por procesar.</p>';
+                return;
+            }
+            
+            pendingEvents.forEach(event => {
+                const eventCard = createEmployeeEventCard(event);
+                container.appendChild(eventCard);
+            });
+        }
+
+        function displayUpcomingEvents() {
+            const container = document.getElementById('upcomingEvents');
+            container.innerHTML = '';
+            
+            const now = new Date();
+            const upcomingEvents = events
+                .filter(e => new Date(e.fecha_evento) > now && e.estado !== 'completado' && e.estado !== 'cancelado')
+                .sort((a, b) => new Date(a.fecha_evento) - new Date(b.fecha_evento))
+                .slice(0, 3);
+            
+            if (upcomingEvents.length === 0) {
+                container.innerHTML = '<p>No tienes eventos próximos.</p>';
+                return;
+            }
+            
+            upcomingEvents.forEach(event => {
+                const eventCard = createEmployeeEventCard(event);
+                container.appendChild(eventCard);
+            });
+        }
+
+        function createEmployeeEventCard(event) {
+            const eventCard = document.createElement('div');
+            eventCard.className = 'event-card';
+            
+            const eventDate = new Date(event.fecha_evento);
+            const formattedDate = eventDate.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            eventCard.innerHTML = `
+                <div class="event-header">
+                    <h3>${event.titulo}</h3>
+                    <span class="event-status status-${event.estado}">${event.estado.replace('_', ' ').toUpperCase()}</span>
+                </div>
+                <p><strong>Cliente:</strong> ${event.cliente_nombre} (${event.cliente_email})</p>
+                <p><strong>Servicio:</strong> ${event.servicio_nombre}</p>
+                <p><strong>Fecha:</strong> ${formattedDate}</p>
+                <p><strong>Ubicación:</strong> ${event.ubicacion}</p>
+                <p><strong>Invitados:</strong> ${event.numero_invitados}</p>
+                ${event.cliente_telefono ? `<p><strong>Teléfono:</strong> ${event.cliente_telefono}</p>` : ''}
+                ${event.descripcion ? `<p><strong>Descripción:</strong> ${event.descripcion}</p>` : ''}
+                
+                <div class="event-actions">
+                    <button class="btn" onclick="viewEventDetails(${event.id})">
+                        <i class="fas fa-eye"></i> Ver Detalles
+                    </button>
+                    <button class="btn btn-warning" onclick="changeEventStatus(${event.id})">
+                        <i class="fas fa-edit"></i> Cambiar Estado
+                    </button>
+                    <button class="btn btn-info" onclick="addFollowup(${event.id})">
+                        <i class="fas fa-comment"></i> Seguimiento
+                    </button>
+                </div>
+            `;
+            
+            return eventCard;
+        }
+
+        async function viewEventDetails(eventId) {
+            try {
+                const response = await fetch(`backend/api/events.php?action=details&id=${eventId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const event = data.data;
+                    const eventDate = new Date(event.fecha_evento);
+                    const formattedDate = eventDate.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    let followupsHtml = '<h3>Seguimientos:</h3>';
+                    if (event.seguimientos && event.seguimientos.length > 0) {
+                        event.seguimientos.forEach(followup => {
+                            const followupDate = new Date(followup.created_at);
+                            followupsHtml += `
+                                <div class="followup-item">
+                                    <div class="followup-header">
+                                        <strong>${followup.usuario_nombre}</strong>
+                                        <span>${followupDate.toLocaleDateString('es-ES')} - ${followup.tipo}</span>
+                                    </div>
+                                    <p>${followup.comentario}</p>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        followupsHtml += '<p>No hay seguimientos registrados.</p>';
+                    }
+                    
+                    document.getElementById('eventDetails').innerHTML = `
+                        <div style="margin-bottom: 2rem;">
+                            <h3>${event.titulo}</h3>
+                            <p><strong>Estado:</strong> <span class="event-status status-${event.estado}">${event.estado.replace('_', ' ').toUpperCase()}</span></p>
+                            <p><strong>Cliente:</strong> ${event.cliente_nombre}</p>
+                            <p><strong>Email:</strong> ${event.cliente_email}</p>
+                            ${event.cliente_telefono ? `<p><strong>Teléfono:</strong> ${event.cliente_telefono}</p>` : ''}
+                            <p><strong>Servicio:</strong> ${event.servicio_nombre} - $${event.servicio_precio}</p>
+                            <p><strong>Fecha:</strong> ${formattedDate}</p>
+                            <p><strong>Ubicación:</strong> ${event.ubicacion}</p>
+                            <p><strong>Número de invitados:</strong> ${event.numero_invitados}</p>
+                            ${event.presupuesto ? `<p><strong>Presupuesto:</strong> $${event.presupuesto}</p>` : ''}
+                            ${event.descripcion ? `<p><strong>Descripción:</strong> ${event.descripcion}</p>` : ''}
+                            ${event.notas_especiales ? `<p><strong>Notas especiales:</strong> ${event.notas_especiales}</p>` : ''}
+                        </div>
+                        ${followupsHtml}
+                    `;
+                    
+                    document.getElementById('eventModal').style.display = 'block';
+                } else {
+                    alert('Error al cargar detalles del evento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar detalles del evento');
+            }
+        }
+
+        function changeEventStatus(eventId) {
+            document.getElementById('statusEventId').value = eventId;
+            document.getElementById('statusModal').style.display = 'block';
+        }
+
+        function addFollowup(eventId) {
+            document.getElementById('followupEventId').value = eventId;
+            document.getElementById('followupModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            document.getElementById('statusForm').reset();
+            document.getElementById('statusSuccess').style.display = 'none';
+            document.getElementById('statusError').style.display = 'none';
+        }
+
+        function closeFollowupModal() {
+            document.getElementById('followupModal').style.display = 'none';
+            document.getElementById('followupForm').reset();
+            document.getElementById('followupSuccess').style.display = 'none';
+            document.getElementById('followupError').style.display = 'none';
+        }
+
+        // Manejar cambio de estado
+        document.getElementById('statusForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const successAlert = document.getElementById('statusSuccess');
+            const errorAlert = document.getElementById('statusError');
+            
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            const formData = {
+                action: 'update_status',
+                evento_id: document.getElementById('statusEventId').value,
+                estado: document.getElementById('newStatus').value
+            };
+            
+            try {
+                const response = await fetch('backend/api/events.php', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successAlert.textContent = data.message;
+                    successAlert.style.display = 'block';
+                    
+                    // Si hay comentario, agregarlo como seguimiento
+                    const comment = document.getElementById('statusComment').value;
+                    if (comment.trim()) {
+                        await addFollowupComment(formData.evento_id, comment, 'cambio_estado');
+                    }
+                    
+                    // Recargar eventos
+                    loadEvents();
+                    
+                    // Cerrar modal después de un momento
+                    setTimeout(() => {
+                        closeStatusModal();
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || 'Error al actualizar estado');
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+            }
+        });
+
+        // Manejar agregar seguimiento
+        document.getElementById('followupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const successAlert = document.getElementById('followupSuccess');
+            const errorAlert = document.getElementById('followupError');
+            
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            const eventId = document.getElementById('followupEventId').value;
+            const tipo = document.getElementById('followupType').value;
+            const comentario = document.getElementById('followupComment').value;
+            
+            try {
+                const result = await addFollowupComment(eventId, comentario, tipo);
+                
+                if (result) {
+                    successAlert.textContent = 'Seguimiento agregado exitosamente';
+                    successAlert.style.display = 'block';
+                    
+                    // Limpiar formulario
+                    document.getElementById('followupForm').reset();
+                    
+                    // Cerrar modal después de un momento
+                    setTimeout(() => {
+                        closeFollowupModal();
+                    }, 2000);
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+            }
+        });
+
+        async function addFollowupComment(eventId, comentario, tipo) {
+            const formData = {
+                action: 'add_followup',
+                evento_id: eventId,
+                comentario: comentario,
+                tipo: tipo
+            };
+            
+            const response = await fetch('backend/api/events.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Error al agregar seguimiento');
+            }
+            
+            return true;
+        }
+
+        async function logout() {
+            try {
+                await fetch('backend/auth/logout.php');
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+            }
+        }
+
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            const eventModal = document.getElementById('eventModal');
+            const statusModal = document.getElementById('statusModal');
+            const followupModal = document.getElementById('followupModal');
+            
+            if (event.target == eventModal) {
+                closeModal();
+            }
+            if (event.target == statusModal) {
+                closeStatusModal();
+            }
+            if (event.target == followupModal) {
+                closeFollowupModal();
+            }
+        }
+    </script>
+</body>
+</html>
