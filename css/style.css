@@ -151,6 +151,10 @@ section{
     display: none;
 }
 
+.mobile-auth-buttons{
+    display: none !important;
+}
+
 .home .content{
     text-align: center;
     padding-top: 6rem;
@@ -599,7 +603,7 @@ section{
     }
 
     .header .navbar.active .mobile-auth-buttons{
-        display: flex;
+        display: flex !important;
         flex-direction: column;
         gap: 1rem;
         margin: 1.3rem;
