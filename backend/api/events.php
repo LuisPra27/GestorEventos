@@ -272,7 +272,7 @@ switch ($method) {
                     if ($notas) {
                         $message .= " - Notas: $notas";
                     }
-                    $eventModel->addFollowUp($event_id, $_SESSION['user_id'], $message, 'asignacion');
+                    $eventModel->addFollowUp($event_id, $_SESSION['user_id'], $message, 'cambio_estado');
                     
                     echo json_encode(['success' => true, 'message' => 'Empleado asignado correctamente']);
                 } else {

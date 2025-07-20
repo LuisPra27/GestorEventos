@@ -177,8 +177,7 @@
         }
 
         .status-pendiente { background: #fff3cd; color: #856404; }
-        .status-confirmado { background: #d1ecf1; color: #0c5460; }
-        .status-en_progreso { background: #d4edda; color: #155724; }
+        .status-en_progreso { background: #d1ecf1; color: #0c5460; }
         .status-completado { background: #d4edda; color: #155724; }
         .status-cancelado { background: #f8d7da; color: #721c24; }
 
@@ -427,7 +426,7 @@
                 <div class="form-group">
                     <label for="newStatus">Nuevo Estado:</label>
                     <select id="newStatus" required>
-                        <option value="confirmado">Confirmado</option>
+                        <option value="pendiente">Pendiente</option>
                         <option value="en_progreso">En Progreso</option>
                         <option value="completado">Completado</option>
                         <option value="cancelado">Cancelado</option>
@@ -552,7 +551,7 @@
 
         function updateDashboardStats() {
             const totalEvents = events.length;
-            const pendingEvents = events.filter(e => e.estado === 'confirmado').length;
+            const pendingEvents = events.filter(e => e.estado === 'pendiente').length;
             const inProgressEvents = events.filter(e => e.estado === 'en_progreso').length;
             const completedEvents = events.filter(e => e.estado === 'completado').length;
             
@@ -581,7 +580,7 @@
             const container = document.getElementById('pendingEventsList');
             container.innerHTML = '';
             
-            const pendingEvents = events.filter(e => e.estado === 'confirmado');
+            const pendingEvents = events.filter(e => e.estado === 'pendiente');
             
             if (pendingEvents.length === 0) {
                 container.innerHTML = '<p>No hay eventos pendientes por procesar.</p>';
