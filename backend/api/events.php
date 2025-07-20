@@ -236,6 +236,53 @@ switch ($method) {
                 http_response_code(500);
                 echo json_encode(['error' => 'Error al actualizar estado']);
             }
+            
+        } elseif ($action === 'assign_employee') {
+            // Solo gerentes pueden asignar empleados
+            if ($_SESSION['user_role'] != 3) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Solo gerentes pueden asignar empleados']);
+                exit;
+            }
+            
+            $event_id = $input['event_id'] ?? null;
+            $employee_id = $input['employee_id'] ?? null;
+            $estado = $input['estado'] ?? null;
+            $notas = $input['notas'] ?? '';
+            
+            if (!$event_id) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID del evento requerido']);
+                exit;
+            }
+            
+            try {
+                // Actualizar la asignación del empleado
+                $result = $eventModel->assignEmployee($event_id, $employee_id);
+                
+                // Si también se cambió el estado, actualizarlo
+                if ($estado && $result) {
+                    $eventModel->updateStatus($event_id, $estado);
+                }
+                
+                // Agregar seguimiento
+                if ($result) {
+                    $employeeName = $employee_id ? $userModel->findById($employee_id)['nombre'] : 'Sin asignar';
+                    $message = $employee_id ? "Empleado asignado: $employeeName" : "Empleado desasignado";
+                    if ($notas) {
+                        $message .= " - Notas: $notas";
+                    }
+                    $eventModel->addFollowUp($event_id, $_SESSION['user_id'], $message, 'asignacion');
+                    
+                    echo json_encode(['success' => true, 'message' => 'Empleado asignado correctamente']);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Error al asignar empleado']);
+                }
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Error al asignar empleado: ' . $e->getMessage()]);
+            }
         }
         break;
         

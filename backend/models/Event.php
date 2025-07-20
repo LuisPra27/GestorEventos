@@ -97,7 +97,7 @@ class Event {
     }
 
     public function assignEmployee($evento_id, $empleado_id) {
-        $sql = "UPDATE {$this->table} SET empleado_id = ?, estado = 'confirmado' WHERE id = ?";
+        $sql = "UPDATE {$this->table} SET empleado_id = ? WHERE id = ?";
         $stmt = $this->db->prepare($sql);
         
         return $stmt->execute([$empleado_id, $evento_id]);

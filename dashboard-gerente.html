@@ -771,6 +771,68 @@
         </div>
     </div>
 
+    <!-- Modal para Ver Detalles del Evento -->
+    <div id="eventDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles del Evento</h2>
+                <span class="close" onclick="closeEventDetailsModal()">&times;</span>
+            </div>
+            
+            <div id="eventDetailsContent">
+                <!-- Los detalles se cargarán aquí -->
+            </div>
+            
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="closeEventDetailsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Asignar Empleado -->
+    <div id="assignEmployeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Asignar Empleado</h2>
+                <span class="close" onclick="closeAssignEmployeeModal()">&times;</span>
+            </div>
+            
+            <div class="alert alert-success" id="assignSuccess"></div>
+            <div class="alert alert-error" id="assignError"></div>
+            
+            <form id="assignEmployeeForm">
+                <input type="hidden" id="assignEventId">
+                
+                <div class="form-group">
+                    <label for="employeeSelect">Seleccionar Empleado *</label>
+                    <select id="employeeSelect" required>
+                        <option value="">Seleccionar empleado</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="eventStatus">Estado del Evento</label>
+                    <select id="eventStatus">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="en_progreso">En Progreso</option>
+                        <option value="completado">Completado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assignNotes">Notas (opcional)</label>
+                    <textarea id="assignNotes" rows="3" placeholder="Notas adicionales sobre la asignación..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-user-check"></i> Asignar Empleado
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         let currentUser = null;
         let users = [];
@@ -963,7 +1025,26 @@
             const tbody = document.getElementById('eventsTableBody');
             tbody.innerHTML = '';
             
-            events.forEach(event => {
+            // Aplicar filtros
+            let filteredEvents = events;
+            
+            // Filtro por estado
+            const statusFilter = document.getElementById('eventStatusFilter').value;
+            if (statusFilter) {
+                filteredEvents = filteredEvents.filter(event => event.estado === statusFilter);
+            }
+            
+            // Filtro por búsqueda
+            const searchTerm = document.getElementById('eventSearch').value.toLowerCase();
+            if (searchTerm) {
+                filteredEvents = filteredEvents.filter(event => 
+                    event.titulo.toLowerCase().includes(searchTerm) ||
+                    event.cliente_nombre.toLowerCase().includes(searchTerm) ||
+                    event.servicio_nombre.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            filteredEvents.forEach(event => {
                 const eventDate = new Date(event.fecha_evento);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -975,15 +1056,51 @@
                     <td><span class="status-badge status-${event.estado}">${event.estado.replace('_', ' ').toUpperCase()}</span></td>
                     <td>${event.empleado_nombre || 'Sin asignar'}</td>
                     <td>
-                        <button class="btn btn-info" onclick="viewEventDetails(${event.id})">
+                        <button class="btn btn-info" onclick="viewEventDetails(${event.id})" title="Ver detalles">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn btn-success" onclick="assignEmployee(${event.id})">
+                        <button class="btn btn-success" onclick="assignEmployee(${event.id})" title="Asignar empleado">
                             <i class="fas fa-user-plus"></i>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
+            });
+        }
+
+        function filterEvents() {
+            displayEvents();
+        }
+
+        // Agregar event listeners para los filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... código existente ...
+            
+            // Event listeners para filtros
+            document.getElementById('eventSearch').addEventListener('input', filterEvents);
+            document.getElementById('userSearch').addEventListener('input', filterUsers);
+            document.getElementById('serviceSearch').addEventListener('input', filterServices);
+        });
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const tbody = document.getElementById('usersTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function filterServices() {
+            const searchTerm = document.getElementById('serviceSearch').value.toLowerCase();
+            const tbody = document.getElementById('servicesTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
             });
         }
 
@@ -1277,6 +1394,136 @@
             }
         });
 
+
+        async function viewEventDetails(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) {
+                alert('Evento no encontrado');
+                return;
+            }
+            
+            const eventDate = new Date(event.fecha_evento);
+            const createdDate = new Date(event.fecha_creacion);
+            
+            const detailsHtml = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h4>Información General</h4>
+                        <p><strong>Título:</strong> ${event.titulo}</p>
+                        <p><strong>Descripción:</strong> ${event.descripcion || 'Sin descripción'}</p>
+                        <p><strong>Estado:</strong> <span class="status-badge status-${event.estado}">${event.estado.replace('_', ' ').toUpperCase()}</span></p>
+                        <p><strong>Fecha del Evento:</strong> ${eventDate.toLocaleDateString('es-ES')} ${event.hora || ''}</p>
+                        <p><strong>Ubicación:</strong> ${event.ubicacion || 'Sin especificar'}</p>
+                        <p><strong>Número de Invitados:</strong> ${event.numero_invitados || 'Sin especificar'}</p>
+                    </div>
+                    <div>
+                        <h4>Cliente y Servicio</h4>
+                        <p><strong>Cliente:</strong> ${event.cliente_nombre}</p>
+                        <p><strong>Email Cliente:</strong> ${event.cliente_email}</p>
+                        <p><strong>Teléfono Cliente:</strong> ${event.cliente_telefono || 'Sin teléfono'}</p>
+                        <p><strong>Servicio:</strong> ${event.servicio_nombre}</p>
+                        <p><strong>Precio:</strong> $${event.servicio_precio}</p>
+                        <p><strong>Empleado Asignado:</strong> ${event.empleado_nombre || 'Sin asignar'}</p>
+                        <p><strong>Creado:</strong> ${createdDate.toLocaleDateString('es-ES')}</p>
+                    </div>
+                </div>
+                
+                ${event.requisitos_especiales ? `
+                    <div style="margin-top: 1rem;">
+                        <h4>Requisitos Especiales</h4>
+                        <p>${event.requisitos_especiales}</p>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('eventDetailsContent').innerHTML = detailsHtml;
+            document.getElementById('eventDetailsModal').style.display = 'block';
+        }
+
+        function closeEventDetailsModal() {
+            document.getElementById('eventDetailsModal').style.display = 'none';
+        }
+
+        async function assignEmployee(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) {
+                alert('Evento no encontrado');
+                return;
+            }
+            
+            // Cargar empleados disponibles
+            const employees = users.filter(u => u.rol_id === 2 && u.activo);
+            const employeeSelect = document.getElementById('employeeSelect');
+            employeeSelect.innerHTML = '<option value="">Seleccionar empleado</option>';
+            
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = emp.nombre;
+                if (event.empleado_id && event.empleado_id == emp.id) {
+                    option.selected = true;
+                }
+                employeeSelect.appendChild(option);
+            });
+            
+            // Establecer valores actuales
+            document.getElementById('assignEventId').value = eventId;
+            document.getElementById('eventStatus').value = event.estado;
+            
+            // Limpiar alertas y notas
+            document.getElementById('assignSuccess').style.display = 'none';
+            document.getElementById('assignError').style.display = 'none';
+            document.getElementById('assignNotes').value = '';
+            
+            document.getElementById('assignEmployeeModal').style.display = 'block';
+        }
+
+        function closeAssignEmployeeModal() {
+            document.getElementById('assignEmployeeModal').style.display = 'none';
+            document.getElementById('assignEmployeeForm').reset();
+        }
+
+        // Manejar formulario de asignación de empleado
+        document.getElementById('assignEmployeeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const successAlert = document.getElementById('assignSuccess');
+            const errorAlert = document.getElementById('assignError');
+            
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            const formData = {
+                action: 'assign_employee',
+                event_id: document.getElementById('assignEventId').value,
+                employee_id: document.getElementById('employeeSelect').value,
+                estado: document.getElementById('eventStatus').value,
+                notas: document.getElementById('assignNotes').value
+            };
+            
+            try {
+                const response = await fetch('backend/api/events.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successAlert.textContent = 'Empleado asignado correctamente';
+                    successAlert.style.display = 'block';
+                    loadEvents();
+                    setTimeout(closeAssignEmployeeModal, 2000);
+                } else {
+                    throw new Error(data.error || 'Error al asignar empleado');
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+            }
+        });
+
         async function logout() {
             try {
                 await fetch('backend/auth/logout.php');
@@ -1291,12 +1538,20 @@
         window.onclick = function(event) {
             const userModal = document.getElementById('userModal');
             const serviceModal = document.getElementById('serviceModal');
+            const eventDetailsModal = document.getElementById('eventDetailsModal');
+            const assignEmployeeModal = document.getElementById('assignEmployeeModal');
             
             if (event.target == userModal) {
                 closeUserModal();
             }
             if (event.target == serviceModal) {
                 closeServiceModal();
+            }
+            if (event.target == eventDetailsModal) {
+                closeEventDetailsModal();
+            }
+            if (event.target == assignEmployeeModal) {
+                closeAssignEmployeeModal();
             }
         }
     </script>
