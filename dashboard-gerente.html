@@ -809,8 +809,35 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="eventStatus">Estado del Evento</label>
-                    <select id="eventStatus">
+                    <label for="assignNotes">Notas (opcional)</label>
+                    <textarea id="assignNotes" rows="3" placeholder="Notas adicionales sobre la asignación..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-user-check"></i> Asignar Empleado
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Cambiar Estado -->
+    <div id="changeStatusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cambiar Estado del Evento</h2>
+                <span class="close" onclick="closeChangeStatusModal()">&times;</span>
+            </div>
+            
+            <div class="alert alert-success" id="statusSuccess"></div>
+            <div class="alert alert-error" id="statusError"></div>
+            
+            <form id="changeStatusForm">
+                <input type="hidden" id="statusEventId">
+                
+                <div class="form-group">
+                    <label for="newEventStatus">Nuevo Estado *</label>
+                    <select id="newEventStatus" required>
+                        <option value="">Seleccionar estado</option>
                         <option value="pendiente">Pendiente</option>
                         <option value="en_progreso">En Progreso</option>
                         <option value="completado">Completado</option>
@@ -819,12 +846,12 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="assignNotes">Notas (opcional)</label>
-                    <textarea id="assignNotes" rows="3" placeholder="Notas adicionales sobre la asignación..."></textarea>
+                    <label for="statusNotes">Notas del cambio (opcional)</label>
+                    <textarea id="statusNotes" rows="3" placeholder="Motivo o notas sobre el cambio de estado..."></textarea>
                 </div>
                 
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-user-check"></i> Asignar Empleado
+                <button type="submit" class="btn btn-info">
+                    <i class="fas fa-exchange-alt"></i> Cambiar Estado
                 </button>
             </form>
         </div>
@@ -1044,6 +1071,17 @@
             filteredEvents.forEach(event => {
                 const eventDate = new Date(event.fecha_evento);
                 const tr = document.createElement('tr');
+                
+                // Determinar los botones de acción
+                const hasEmployee = event.empleado_nombre && event.empleado_nombre !== 'Sin asignar';
+                const assignButton = hasEmployee 
+                    ? `<button class="btn btn-warning" onclick="assignEmployee(${event.id})" title="Reasignar empleado">
+                           <i class="fas fa-user-edit"></i>
+                       </button>`
+                    : `<button class="btn btn-success" onclick="assignEmployee(${event.id})" title="Asignar empleado">
+                           <i class="fas fa-user-plus"></i>
+                       </button>`;
+                
                 tr.innerHTML = `
                     <td>${event.id}</td>
                     <td>${event.titulo}</td>
@@ -1056,9 +1094,10 @@
                         <button class="btn btn-info" onclick="viewEventDetails(${event.id})" title="Ver detalles">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn btn-success" onclick="assignEmployee(${event.id})" title="Asignar empleado">
-                            <i class="fas fa-user-plus"></i>
+                        <button class="btn btn-secondary" onclick="changeEventStatus(${event.id})" title="Cambiar estado">
+                            <i class="fas fa-exchange-alt"></i>
                         </button>
+                        ${assignButton}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1448,10 +1487,24 @@
                 return;
             }
             
+            // Actualizar el título del modal basado en si ya tiene empleado
+            const hasEmployee = event.empleado_nombre && event.empleado_nombre !== 'Sin asignar';
+            const modalTitle = hasEmployee ? 'Reasignar Empleado' : 'Asignar Empleado';
+            document.querySelector('#assignEmployeeModal .modal-header h2').textContent = modalTitle;
+            
             // Cargar empleados disponibles
             const employees = users.filter(u => u.rol_id === 2 && u.activo);
             const employeeSelect = document.getElementById('employeeSelect');
-            employeeSelect.innerHTML = '<option value="">Seleccionar empleado</option>';
+            
+            // Cambiar la etiqueta del selector
+            const employeeLabel = document.querySelector('label[for="employeeSelect"]');
+            if (hasEmployee) {
+                employeeLabel.textContent = 'Cambiar Empleado';
+                employeeSelect.innerHTML = '<option value="">Desasignar empleado</option>';
+            } else {
+                employeeLabel.textContent = 'Seleccionar Empleado *';
+                employeeSelect.innerHTML = '<option value="">Seleccionar empleado</option>';
+            }
             
             employees.forEach(emp => {
                 const option = document.createElement('option');
@@ -1465,12 +1518,19 @@
             
             // Establecer valores actuales
             document.getElementById('assignEventId').value = eventId;
-            document.getElementById('eventStatus').value = event.estado;
             
             // Limpiar alertas y notas
             document.getElementById('assignSuccess').style.display = 'none';
             document.getElementById('assignError').style.display = 'none';
             document.getElementById('assignNotes').value = '';
+            
+            // Actualizar texto del botón
+            const submitBtn = document.querySelector('#assignEmployeeForm button[type="submit"]');
+            if (hasEmployee) {
+                submitBtn.innerHTML = '<i class="fas fa-user-edit"></i> Reasignar Empleado';
+            } else {
+                submitBtn.innerHTML = '<i class="fas fa-user-check"></i> Asignar Empleado';
+            }
             
             document.getElementById('assignEmployeeModal').style.display = 'block';
         }
@@ -1478,6 +1538,35 @@
         function closeAssignEmployeeModal() {
             document.getElementById('assignEmployeeModal').style.display = 'none';
             document.getElementById('assignEmployeeForm').reset();
+            
+            // Restaurar textos originales
+            document.querySelector('#assignEmployeeModal .modal-header h2').textContent = 'Asignar Empleado';
+            document.querySelector('label[for="employeeSelect"]').textContent = 'Seleccionar Empleado *';
+            document.querySelector('#assignEmployeeForm button[type="submit"]').innerHTML = '<i class="fas fa-user-check"></i> Asignar Empleado';
+        }
+
+        async function changeEventStatus(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) {
+                alert('Evento no encontrado');
+                return;
+            }
+            
+            // Establecer el evento actual
+            document.getElementById('statusEventId').value = eventId;
+            document.getElementById('newEventStatus').value = event.estado;
+            
+            // Limpiar alertas y notas
+            document.getElementById('statusSuccess').style.display = 'none';
+            document.getElementById('statusError').style.display = 'none';
+            document.getElementById('statusNotes').value = '';
+            
+            document.getElementById('changeStatusModal').style.display = 'block';
+        }
+
+        function closeChangeStatusModal() {
+            document.getElementById('changeStatusModal').style.display = 'none';
+            document.getElementById('changeStatusForm').reset();
         }
 
         // Manejar formulario de asignación de empleado
@@ -1494,7 +1583,6 @@
                 action: 'assign_employee',
                 event_id: document.getElementById('assignEventId').value,
                 employee_id: document.getElementById('employeeSelect').value,
-                estado: document.getElementById('eventStatus').value,
                 notas: document.getElementById('assignNotes').value
             };
             
@@ -1508,12 +1596,56 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    successAlert.textContent = 'Empleado asignado correctamente';
+                    const employeeId = document.getElementById('employeeSelect').value;
+                    const message = employeeId 
+                        ? 'Empleado asignado correctamente' 
+                        : 'Empleado desasignado correctamente';
+                    successAlert.textContent = message;
                     successAlert.style.display = 'block';
                     loadEvents();
                     setTimeout(closeAssignEmployeeModal, 2000);
                 } else {
                     throw new Error(data.error || 'Error al asignar empleado');
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+            }
+        });
+
+        // Manejar formulario de cambio de estado
+        document.getElementById('changeStatusForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const successAlert = document.getElementById('statusSuccess');
+            const errorAlert = document.getElementById('statusError');
+            
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            const formData = {
+                action: 'change_status',
+                event_id: document.getElementById('statusEventId').value,
+                estado: document.getElementById('newEventStatus').value,
+                notas: document.getElementById('statusNotes').value
+            };
+            
+            try {
+                const response = await fetch('backend/api/events.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successAlert.textContent = 'Estado del evento actualizado correctamente';
+                    successAlert.style.display = 'block';
+                    loadEvents();
+                    setTimeout(closeChangeStatusModal, 2000);
+                } else {
+                    throw new Error(data.error || 'Error al cambiar el estado del evento');
                 }
             } catch (error) {
                 errorAlert.textContent = error.message;
@@ -1537,6 +1669,7 @@
             const serviceModal = document.getElementById('serviceModal');
             const eventDetailsModal = document.getElementById('eventDetailsModal');
             const assignEmployeeModal = document.getElementById('assignEmployeeModal');
+            const changeStatusModal = document.getElementById('changeStatusModal');
             
             if (event.target == userModal) {
                 closeUserModal();
@@ -1549,6 +1682,9 @@
             }
             if (event.target == assignEmployeeModal) {
                 closeAssignEmployeeModal();
+            }
+            if (event.target == changeStatusModal) {
+                closeChangeStatusModal();
             }
         }
     </script>

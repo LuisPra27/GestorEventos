@@ -247,7 +247,6 @@ switch ($method) {
             
             $event_id = $input['event_id'] ?? null;
             $employee_id = $input['employee_id'] ?? null;
-            $estado = $input['estado'] ?? null;
             $notas = $input['notas'] ?? '';
             
             if (!$event_id) {
@@ -259,11 +258,6 @@ switch ($method) {
             try {
                 // Actualizar la asignación del empleado
                 $result = $eventModel->assignEmployee($event_id, $employee_id);
-                
-                // Si también se cambió el estado, actualizarlo
-                if ($estado && $result) {
-                    $eventModel->updateStatus($event_id, $estado);
-                }
                 
                 // Agregar seguimiento
                 if ($result) {
@@ -282,6 +276,45 @@ switch ($method) {
             } catch (Exception $e) {
                 http_response_code(500);
                 echo json_encode(['error' => 'Error al asignar empleado: ' . $e->getMessage()]);
+            }
+            
+        } elseif ($action === 'change_status') {
+            // Solo gerentes pueden cambiar estados directamente
+            if ($_SESSION['user_role'] != 3) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Solo gerentes pueden cambiar estados']);
+                exit;
+            }
+            
+            $event_id = $input['event_id'] ?? null;
+            $estado = $input['estado'] ?? null;
+            $notas = $input['notas'] ?? '';
+            
+            if (!$event_id || !$estado) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID del evento y estado requeridos']);
+                exit;
+            }
+            
+            try {
+                $result = $eventModel->updateStatus($event_id, $estado);
+                
+                if ($result) {
+                    // Agregar seguimiento
+                    $message = "Estado cambiado a: " . ucfirst(str_replace('_', ' ', $estado));
+                    if ($notas) {
+                        $message .= " - Notas: $notas";
+                    }
+                    $eventModel->addFollowUp($event_id, $_SESSION['user_id'], $message, 'cambio_estado');
+                    
+                    echo json_encode(['success' => true, 'message' => 'Estado actualizado correctamente']);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Error al actualizar estado']);
+                }
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Error al cambiar estado: ' . $e->getMessage()]);
             }
         }
         break;
