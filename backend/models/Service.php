@@ -38,15 +38,22 @@ class Service {
         return false;
     }
 
-    public function update($id, $nombre, $descripcion, $precio, $duracion_horas) {
-        $sql = "UPDATE {$this->table} SET nombre = ?, descripcion = ?, precio = ?, duracion_horas = ? WHERE id = ?";
+    public function update($id, $nombre, $descripcion, $precio, $duracion_horas, $activo = true) {
+        $sql = "UPDATE {$this->table} SET nombre = ?, descripcion = ?, precio = ?, duracion_horas = ?, activo = ? WHERE id = ?";
         $stmt = $this->db->prepare($sql);
         
-        return $stmt->execute([$nombre, $descripcion, $precio, $duracion_horas, $id]);
+        return $stmt->execute([$nombre, $descripcion, $precio, $duracion_horas, $activo, $id]);
     }
 
     public function delete($id) {
         $sql = "UPDATE {$this->table} SET activo = false WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        
+        return $stmt->execute([$id]);
+    }
+
+    public function toggleStatus($id) {
+        $sql = "UPDATE {$this->table} SET activo = NOT activo WHERE id = ?";
         $stmt = $this->db->prepare($sql);
         
         return $stmt->execute([$id]);

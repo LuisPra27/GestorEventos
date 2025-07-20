@@ -30,9 +30,14 @@ switch ($method) {
             } elseif ($_SESSION['user_role'] == 2) { // Empleado
                 $events = $eventModel->getByEmployeeId($_SESSION['user_id']);
             } else { // Gerente
-                $events = $eventModel->getAll();
+                $events = $eventModel->getAllForManager();
             }
             
+            echo json_encode(['success' => true, 'data' => $events]);
+            
+        } elseif ($action === 'all' && $_SESSION['user_role'] == 3) {
+            // Solo gerentes pueden usar esta acción
+            $events = $eventModel->getAllForManager();
             echo json_encode(['success' => true, 'data' => $events]);
             
         } elseif ($action === 'details') {

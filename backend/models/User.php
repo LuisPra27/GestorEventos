@@ -80,5 +80,56 @@ class User {
         
         return $stmt->execute([$nombre, $telefono, $id]);
     }
+
+    public function getAll() {
+        $sql = "SELECT u.*, r.nombre as rol_nombre FROM {$this->table} u 
+                JOIN roles r ON u.rol_id = r.id 
+                ORDER BY u.id DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        
+        $users = $stmt->fetchAll();
+        
+        // Remover contraseñas de la respuesta
+        foreach ($users as &$user) {
+            unset($user['password']);
+        }
+        
+        return $users;
+    }
+
+    public function create($nombre, $email, $password, $rol_id = 1, $telefono = null) {
+        $sql = "INSERT INTO {$this->table} (nombre, email, telefono, password, rol_id) VALUES (?, ?, ?, ?, ?) RETURNING id";
+        $stmt = $this->db->prepare($sql);
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        
+        $result = $stmt->execute([$nombre, $email, $telefono, $hashedPassword, $rol_id]);
+        
+        if ($result) {
+            return $stmt->fetch()['id'];
+        }
+        
+        return false;
+    }
+
+    public function update($id, $nombre, $email, $password = null, $rol_id = 1, $telefono = null, $activo = true) {
+        if ($password) {
+            $sql = "UPDATE {$this->table} SET nombre = ?, email = ?, telefono = ?, password = ?, rol_id = ?, activo = ? WHERE id = ?";
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$nombre, $email, $telefono, $hashedPassword, $rol_id, $activo, $id]);
+        } else {
+            $sql = "UPDATE {$this->table} SET nombre = ?, email = ?, telefono = ?, rol_id = ?, activo = ? WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$nombre, $email, $telefono, $rol_id, $activo, $id]);
+        }
+    }
+
+    public function toggleStatus($id) {
+        $sql = "UPDATE {$this->table} SET activo = NOT activo WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        
+        return $stmt->execute([$id]);
+    }
 }
 ?>

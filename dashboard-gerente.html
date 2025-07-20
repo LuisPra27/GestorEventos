@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Gerente - Gestor de Eventos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Fixed Navbar */
+        .fixed-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-section h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+        }
+
+        /* Different colors for each section */
+        .nav-btn.users {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .nav-btn.users.active {
+            background: linear-gradient(135deg, #138496, #117a8b);
+        }
+
+        .nav-btn.services {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .nav-btn.services.active {
+            background: linear-gradient(135deg, #218838, #1aa179);
+        }
+
+        .nav-btn.events {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+
+        .nav-btn.events.active {
+            background: linear-gradient(135deg, #e0a800, #d39e00);
+        }
+
+        .nav-btn.reports {
+            background: linear-gradient(135deg, #6f42c1, #5a2d91);
+        }
+
+        .nav-btn.reports.active {
+            background: linear-gradient(135deg, #5a2d91, #4e2676);
+        }
+
+        .logout-btn-nav {
+            background: linear-gradient(135deg, #343a40, #23272b);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn-nav:hover {
+            background: linear-gradient(135deg, #23272b, #1d2124);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            padding-top: 100px;
+            position: relative;
+            z-index: 10;
+            height: calc(100vh - 100px);
+            overflow: hidden;
+        }
+
+        .content-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 0;
+            display: none;
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .content-section::-webkit-scrollbar-thumb {
+            background: #dc3545;
+            border-radius: 10px;
+        }
+
+        .content-section::-webkit-scrollbar-thumb:hover {
+            background: #c82333;
+        }
+
+        .welcome-section {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #333;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #545b62);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-activo { background: #d4edda; color: #155724; }
+        .status-inactivo { background: #f8d7da; color: #721c24; }
+        .status-pendiente { background: #fff3cd; color: #856404; }
+        .status-confirmado { background: #d1ecf1; color: #0c5460; }
+        .status-en_progreso { background: #d4edda; color: #155724; }
+        .status-completado { background: #d4edda; color: #155724; }
+        .status-cancelado { background: #f8d7da; color: #721c24; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #dc3545;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-bar {
+            width: 300px;
+            padding: 0.5rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #dc3545;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 0 1rem;
+                padding-top: 100px;
+            }
+            
+            .fixed-navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                height: auto;
+            }
+            
+            .nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .content-section {
+                height: auto;
+                min-height: calc(100vh - 200px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Navbar -->
+    <nav class="fixed-navbar">
+        <div class="logo-section">
+            <h1><i class="fas fa-crown"></i> Panel Gerencial</h1>
+            <div class="user-info">
+                <span>¡Hola <strong id="userName">Gerente</strong>!</span>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button class="nav-btn dashboard active" onclick="showSection('main-dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="nav-btn users" onclick="showSection('users')">
+                <i class="fas fa-users"></i> Usuarios
+            </button>
+            <button class="nav-btn services" onclick="showSection('services')">
+                <i class="fas fa-concierge-bell"></i> Servicios
+            </button>
+            <button class="nav-btn events" onclick="showSection('events')">
+                <i class="fas fa-calendar-alt"></i> Eventos
+            </button>
+            <button class="nav-btn reports" onclick="showSection('reports')">
+                <i class="fas fa-chart-bar"></i> Reportes
+            </button>
+            <button class="logout-btn-nav" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Main Dashboard -->
+        <div id="main-dashboard" class="content-section active">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Panel de Control Gerencial</h1>
+                <p style="color: #666; font-size: 1.1rem;">Administración completa del sistema de eventos</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalUsers">0</h3>
+                    <p>Usuarios Totales</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalServices">0</h3>
+                    <p>Servicios Activos</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalEvents">0</h3>
+                    <p>Eventos Totales</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="monthlyRevenue">$0</h3>
+                    <p>Ingresos del Mes</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingEvents">0</h3>
+                    <p>Eventos Pendientes</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="activeEvents">0</h3>
+                    <p>Eventos Activos</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Resumen de Actividad Reciente</h3>
+                <div id="recentActivity"></div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users" class="content-section">
+            <div class="section-header">
+                <h2>Gestión de Usuarios</h2>
+                <div class="action-buttons">
+                    <input type="text" placeholder="Buscar usuarios..." class="search-bar" id="userSearch">
+                    <button class="btn btn-success" onclick="openUserModal()">
+                        <i class="fas fa-plus"></i> Nuevo Usuario
+                    </button>
+                </div>
+            </div>
+            
+            <table class="data-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Services Section -->
+        <div id="services" class="content-section">
+            <div class="section-header">
+                <h2>Gestión de Servicios</h2>
+                <div class="action-buttons">
+                    <input type="text" placeholder="Buscar servicios..." class="search-bar" id="serviceSearch">
+                    <button class="btn btn-success" onclick="openServiceModal()">
+                        <i class="fas fa-plus"></i> Nuevo Servicio
+                    </button>
+                </div>
+            </div>
+            
+            <table class="data-table" id="servicesTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Duración (hrs)</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="servicesTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Events Section -->
+        <div id="events" class="content-section">
+            <div class="section-header">
+                <h2>Gestión de Eventos</h2>
+                <div class="action-buttons">
+                    <input type="text" placeholder="Buscar eventos..." class="search-bar" id="eventSearch">
+                    <select id="eventStatusFilter" onchange="filterEvents()">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="confirmado">Confirmados</option>
+                        <option value="en_progreso">En Progreso</option>
+                        <option value="completado">Completados</option>
+                        <option value="cancelado">Cancelados</option>
+                    </select>
+                </div>
+            </div>
+            
+            <table class="data-table" id="eventsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Cliente</th>
+                        <th>Servicio</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Empleado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="eventsTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports" class="content-section">
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">Reportes y Análisis</h2>
+            
+            <div class="stats-grid">
+                <div class="chart-container">
+                    <h4>Eventos por Estado</h4>
+                    <div id="eventsByStatus"></div>
+                </div>
+                <div class="chart-container">
+                    <h4>Ingresos por Servicio</h4>
+                    <div id="revenueByService"></div>
+                </div>
+                <div class="chart-container">
+                    <h4>Rendimiento de Empleados</h4>
+                    <div id="employeePerformance"></div>
+                </div>
+                <div class="chart-container">
+                    <h4>Tendencia Mensual</h4>
+                    <div id="monthlyTrend"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Usuario -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="userModalTitle">Nuevo Usuario</h2>
+                <span class="close" onclick="closeUserModal()">&times;</span>
+            </div>
+            
+            <div class="alert alert-success" id="userSuccess"></div>
+            <div class="alert alert-error" id="userError"></div>
+            
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userName">Nombre *</label>
+                        <input type="text" id="userName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userEmail">Email *</label>
+                        <input type="email" id="userEmail" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userRole">Rol *</label>
+                        <select id="userRole" required>
+                            <option value="">Seleccionar rol</option>
+                            <option value="1">Cliente</option>
+                            <option value="2">Empleado</option>
+                            <option value="3">Gerente</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userPhone">Teléfono</label>
+                        <input type="tel" id="userPhone">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userPassword">Contraseña *</label>
+                        <input type="password" id="userPassword" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userStatus">Estado</label>
+                        <select id="userStatus">
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Guardar Usuario
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Servicio -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="serviceModalTitle">Nuevo Servicio</h2>
+                <span class="close" onclick="closeServiceModal()">&times;</span>
+            </div>
+            
+            <div class="alert alert-success" id="serviceSuccess"></div>
+            <div class="alert alert-error" id="serviceError"></div>
+            
+            <form id="serviceForm">
+                <input type="hidden" id="serviceId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="serviceName">Nombre *</label>
+                        <input type="text" id="serviceName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="servicePrice">Precio *</label>
+                        <input type="number" id="servicePrice" min="0" step="0.01" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="serviceDuration">Duración (horas)</label>
+                        <input type="number" id="serviceDuration" min="1" value="4">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="serviceStatus">Estado</label>
+                        <select id="serviceStatus">
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label for="serviceDescription">Descripción</label>
+                        <textarea id="serviceDescription" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Guardar Servicio
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let users = [];
+        let services = [];
+        let events = [];
+
+        // Verificar autenticación al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Verificar que sea un gerente
+            if (currentUser.rol_id !== 3) {
+                alert('Acceso denegado. Esta página es solo para gerentes.');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Actualizar información del usuario en la UI
+            document.getElementById('userName').textContent = currentUser.nombre;
+            
+            // Cargar datos iniciales
+            loadAllData();
+        });
+
+        async function loadAllData() {
+            try {
+                await Promise.all([
+                    loadUsers(),
+                    loadServices(),
+                    loadEvents()
+                ]);
+                updateDashboardStats();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('backend/api/users.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    users = data.data;
+                    displayUsers();
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        async function loadServices() {
+            try {
+                const response = await fetch('backend/api/services.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    services = data.data;
+                    displayServices();
+                }
+            } catch (error) {
+                console.error('Error loading services:', error);
+            }
+        }
+
+        async function loadEvents() {
+            try {
+                const response = await fetch('backend/api/events.php?action=all');
+                const data = await response.json();
+                
+                if (data.success) {
+                    events = data.data;
+                    displayEvents();
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+
+        function showSection(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Actualizar navbar activo
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activar el botón correspondiente
+            const activeBtn = document.querySelector(`.nav-btn.${sectionId.replace('-', '')}`) || 
+                             document.querySelector(`.nav-btn.dashboard`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            // Cargar datos específicos de la sección
+            if (sectionId === 'reports') {
+                generateReports();
+            }
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalServices').textContent = services.filter(s => s.activo).length;
+            document.getElementById('totalEvents').textContent = events.length;
+            document.getElementById('pendingEvents').textContent = events.filter(e => e.estado === 'pendiente').length;
+            document.getElementById('activeEvents').textContent = events.filter(e => e.estado === 'en_progreso').length;
+            
+            // Calcular ingresos del mes actual
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const monthlyRevenue = events
+                .filter(e => {
+                    const eventDate = new Date(e.fecha_evento);
+                    return eventDate.getMonth() === currentMonth && 
+                           eventDate.getFullYear() === currentYear &&
+                           e.estado === 'completado';
+                })
+                .reduce((total, event) => total + parseFloat(event.servicio_precio || 0), 0);
+            
+            document.getElementById('monthlyRevenue').textContent = `$${monthlyRevenue.toFixed(2)}`;
+            
+            displayRecentActivity();
+        }
+
+        function displayUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const roles = {1: 'Cliente', 2: 'Empleado', 3: 'Gerente'};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.nombre}</td>
+                    <td>${user.email}</td>
+                    <td>${roles[user.rol_id]}</td>
+                    <td>${user.telefono || '-'}</td>
+                    <td><span class="status-badge status-${user.activo ? 'activo' : 'inactivo'}">${user.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                        <button class="btn btn-info" onclick="editUser(${user.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-warning" onclick="toggleUserStatus(${user.id})">
+                            <i class="fas fa-toggle-${user.activo ? 'on' : 'off'}"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function displayServices() {
+            const tbody = document.getElementById('servicesTableBody');
+            tbody.innerHTML = '';
+            
+            services.forEach(service => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${service.id}</td>
+                    <td>${service.nombre}</td>
+                    <td>$${service.precio}</td>
+                    <td>${service.duracion_horas}</td>
+                    <td><span class="status-badge status-${service.activo ? 'activo' : 'inactivo'}">${service.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                        <button class="btn btn-info" onclick="editService(${service.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-warning" onclick="toggleServiceStatus(${service.id})">
+                            <i class="fas fa-toggle-${service.activo ? 'on' : 'off'}"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function displayEvents() {
+            const tbody = document.getElementById('eventsTableBody');
+            tbody.innerHTML = '';
+            
+            events.forEach(event => {
+                const eventDate = new Date(event.fecha_evento);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${event.id}</td>
+                    <td>${event.titulo}</td>
+                    <td>${event.cliente_nombre}</td>
+                    <td>${event.servicio_nombre}</td>
+                    <td>${eventDate.toLocaleDateString('es-ES')}</td>
+                    <td><span class="status-badge status-${event.estado}">${event.estado.replace('_', ' ').toUpperCase()}</span></td>
+                    <td>${event.empleado_nombre || 'Sin asignar'}</td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewEventDetails(${event.id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-success" onclick="assignEmployee(${event.id})">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function displayRecentActivity() {
+            const container = document.getElementById('recentActivity');
+            const recentEvents = events
+                .sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion))
+                .slice(0, 5);
+                
+            if (recentEvents.length === 0) {
+                container.innerHTML = '<p>No hay actividad reciente.</p>';
+                return;
+            }
+            
+            let html = '<ul style="list-style: none; padding: 0;">';
+            recentEvents.forEach(event => {
+                const date = new Date(event.fecha_creacion);
+                html += `
+                    <li style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        <strong>${event.titulo}</strong> - ${event.cliente_nombre}
+                        <small style="display: block; color: #666;">${date.toLocaleDateString('es-ES')} - ${event.estado}</small>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        function generateReports() {
+            // Eventos por estado
+            const statusCounts = events.reduce((acc, event) => {
+                acc[event.estado] = (acc[event.estado] || 0) + 1;
+                return acc;
+            }, {});
+            
+            let statusHtml = '<ul style="list-style: none; text-align: left;">';
+            Object.entries(statusCounts).forEach(([status, count]) => {
+                statusHtml += `<li><strong>${status.replace('_', ' ').toUpperCase()}:</strong> ${count}</li>`;
+            });
+            statusHtml += '</ul>';
+            document.getElementById('eventsByStatus').innerHTML = statusHtml;
+            
+            // Ingresos por servicio
+            const serviceRevenue = events
+                .filter(e => e.estado === 'completado')
+                .reduce((acc, event) => {
+                    const serviceName = event.servicio_nombre;
+                    const price = parseFloat(event.servicio_precio) || 0;
+                    acc[serviceName] = (acc[serviceName] || 0) + price;
+                    return acc;
+                }, {});
+            
+            let revenueHtml = '<ul style="list-style: none; text-align: left;">';
+            Object.entries(serviceRevenue).forEach(([service, revenue]) => {
+                revenueHtml += `<li><strong>${service}:</strong> $${revenue.toFixed(2)}</li>`;
+            });
+            revenueHtml += '</ul>';
+            document.getElementById('revenueByService').innerHTML = revenueHtml;
+            
+            // Rendimiento de empleados
+            const employeeStats = events
+                .filter(e => e.empleado_nombre)
+                .reduce((acc, event) => {
+                    const empName = event.empleado_nombre;
+                    if (!acc[empName]) {
+                        acc[empName] = { total: 0, completed: 0 };
+                    }
+                    acc[empName].total++;
+                    if (event.estado === 'completado') {
+                        acc[empName].completed++;
+                    }
+                    return acc;
+                }, {});
+            
+            let empHtml = '<ul style="list-style: none; text-align: left;">';
+            Object.entries(employeeStats).forEach(([emp, stats]) => {
+                const rate = ((stats.completed / stats.total) * 100).toFixed(1);
+                empHtml += `<li><strong>${emp}:</strong> ${stats.completed}/${stats.total} (${rate}%)</li>`;
+            });
+            empHtml += '</ul>';
+            document.getElementById('employeePerformance').innerHTML = empHtml;
+            
+            // Tendencia mensual (últimos 6 meses)
+            const monthlyData = {};
+            const now = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                monthlyData[monthKey] = 0;
+            }
+            
+            events.forEach(event => {
+                const eventDate = new Date(event.fecha_evento);
+                const monthKey = `${eventDate.getFullYear()}-${(eventDate.getMonth() + 1).toString().padStart(2, '0')}`;
+                if (monthlyData.hasOwnProperty(monthKey)) {
+                    monthlyData[monthKey]++;
+                }
+            });
+            
+            let trendHtml = '<ul style="list-style: none; text-align: left;">';
+            Object.entries(monthlyData).forEach(([month, count]) => {
+                trendHtml += `<li><strong>${month}:</strong> ${count} eventos</li>`;
+            });
+            trendHtml += '</ul>';
+            document.getElementById('monthlyTrend').innerHTML = trendHtml;
+        }
+
+        // Funciones de modales y formularios
+        function openUserModal(userId = null) {
+            document.getElementById('userModal').style.display = 'block';
+            document.getElementById('userModalTitle').textContent = userId ? 'Editar Usuario' : 'Nuevo Usuario';
+            
+            if (userId) {
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    document.getElementById('userId').value = user.id;
+                    document.getElementById('userName').value = user.nombre;
+                    document.getElementById('userEmail').value = user.email;
+                    document.getElementById('userRole').value = user.rol_id;
+                    document.getElementById('userPhone').value = user.telefono || '';
+                    document.getElementById('userStatus').value = user.activo ? 'activo' : 'inactivo';
+                    document.getElementById('userPassword').required = false;
+                }
+            }
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+            document.getElementById('userForm').reset();
+            document.getElementById('userSuccess').style.display = 'none';
+            document.getElementById('userError').style.display = 'none';
+            document.getElementById('userPassword').required = true;
+        }
+
+        function openServiceModal(serviceId = null) {
+            document.getElementById('serviceModal').style.display = 'block';
+            document.getElementById('serviceModalTitle').textContent = serviceId ? 'Editar Servicio' : 'Nuevo Servicio';
+            
+            if (serviceId) {
+                const service = services.find(s => s.id === serviceId);
+                if (service) {
+                    document.getElementById('serviceId').value = service.id;
+                    document.getElementById('serviceName').value = service.nombre;
+                    document.getElementById('servicePrice').value = service.precio;
+                    document.getElementById('serviceDuration').value = service.duracion_horas;
+                    document.getElementById('serviceDescription').value = service.descripcion || '';
+                    document.getElementById('serviceStatus').value = service.activo ? 'activo' : 'inactivo';
+                }
+            }
+        }
+
+        function closeServiceModal() {
+            document.getElementById('serviceModal').style.display = 'none';
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceSuccess').style.display = 'none';
+            document.getElementById('serviceError').style.display = 'none';
+        }
+
+        function editUser(userId) {
+            openUserModal(userId);
+        }
+
+        function editService(serviceId) {
+            openServiceModal(serviceId);
+        }
+
+        async function toggleUserStatus(userId) {
+            try {
+                const response = await fetch('backend/api/users.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'toggle_status', id: userId })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    loadUsers();
+                } else {
+                    alert('Error al cambiar estado del usuario');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cambiar estado del usuario');
+            }
+        }
+
+        async function toggleServiceStatus(serviceId) {
+            try {
+                const response = await fetch('backend/api/services.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'toggle_status', id: serviceId })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    loadServices();
+                } else {
+                    alert('Error al cambiar estado del servicio');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cambiar estado del servicio');
+            }
+        }
+
+        // Manejar formulario de usuario
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const successAlert = document.getElementById('userSuccess');
+            const errorAlert = document.getElementById('userError');
+            
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            const formData = {
+                id: document.getElementById('userId').value,
+                nombre: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                rol_id: document.getElementById('userRole').value,
+                telefono: document.getElementById('userPhone').value,
+                password: document.getElementById('userPassword').value,
+                activo: document.getElementById('userStatus').value === 'activo'
+            };
+            
+            try {
+                const method = formData.id ? 'PUT' : 'POST';
+                const response = await fetch('backend/api/users.php', {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successAlert.textContent = data.message;
+                    successAlert.style.display = 'block';
+                    loadUsers();
+                    setTimeout(closeUserModal, 2000);
+                } else {
+                    throw new Error(data.error || 'Error al guardar usuario');
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+            }
+        });
+
+        // Manejar formulario de servicio
+        document.getElementById('serviceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const successAlert = document.getElementById('serviceSuccess');
+            const errorAlert = document.getElementById('serviceError');
+            
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            const formData = {
+                id: document.getElementById('serviceId').value,
+                nombre: document.getElementById('serviceName').value,
+                precio: document.getElementById('servicePrice').value,
+                duracion_horas: document.getElementById('serviceDuration').value,
+                descripcion: document.getElementById('serviceDescription').value,
+                activo: document.getElementById('serviceStatus').value === 'activo'
+            };
+            
+            try {
+                const method = formData.id ? 'PUT' : 'POST';
+                const response = await fetch('backend/api/services.php', {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successAlert.textContent = data.message;
+                    successAlert.style.display = 'block';
+                    loadServices();
+                    setTimeout(closeServiceModal, 2000);
+                } else {
+                    throw new Error(data.error || 'Error al guardar servicio');
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+            }
+        });
+
+        async function logout() {
+            try {
+                await fetch('backend/auth/logout.php');
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+            }
+        }
+
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            const userModal = document.getElementById('userModal');
+            const serviceModal = document.getElementById('serviceModal');
+            
+            if (event.target == userModal) {
+                closeUserModal();
+            }
+            if (event.target == serviceModal) {
+                closeServiceModal();
+            }
+        }
+    </script>
+</body>
+</html>

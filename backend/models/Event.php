@@ -76,6 +76,11 @@ class Event {
         return $stmt->fetchAll();
     }
 
+    public function getAllForManager() {
+        // Alias para getAll() con información adicional para gerentes
+        return $this->getAll();
+    }
+
     public function findById($id) {
         $sql = "SELECT e.*, s.nombre as servicio_nombre, s.precio as servicio_precio, s.descripcion as servicio_descripcion,
                        c.nombre as cliente_nombre, c.email as cliente_email, c.telefono as cliente_telefono,
