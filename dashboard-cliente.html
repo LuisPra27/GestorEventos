@@ -712,8 +712,19 @@
         async function loadServices() {
             console.log('Loading services...');
             try {
-                const response = await fetch('http://localhost:8000/api/services', { headers: ApiClient.getHeaders() });
+                const response = await fetch('http://localhost:8000/api/services', { 
+                    headers: ApiClient.getHeaders() 
+                });
                 console.log('Services API response status:', response.status);
+                
+                // Si no está autorizado, redirigir al login
+                if (response.status === 401) {
+                    console.log('Token expired or invalid, redirecting to login');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
                 
                 const data = await response.json();
                 console.log('Services API data:', data);
@@ -781,7 +792,19 @@
         async function loadEvents() {
             console.log('Loading events...');
             try {
-                const response = await fetch('http://localhost:8000/api/events', { headers: ApiClient.getHeaders() });
+                const response = await fetch('http://localhost:8000/api/events', { 
+                    headers: ApiClient.getHeaders() 
+                });
+                
+                // Si no está autorizado, redirigir al login
+                if (response.status === 401) {
+                    console.log('Token expired or invalid, redirecting to login');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 if (data.success) {
@@ -794,7 +817,7 @@
                     displayUpcomingEvents();
                 } else {
                     console.error('Error loading events:', data.error);
-                    // Inicializar arrays vacÃ­os si hay error
+                    // Inicializar arrays vacíos si hay error
                     events = [];
                     updateDashboardStats();
                     displayEvents();
@@ -802,7 +825,7 @@
                 }
             } catch (error) {
                 console.error('Error loading events:', error);
-                // Inicializar arrays vacÃ­os si hay error
+                // Inicializar arrays vacíos si hay error
                 events = [];
                 updateDashboardStats();
                 displayEvents();
@@ -931,11 +954,18 @@
             try {
                 const response = await fetch('http://localhost:8000/api/events', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: ApiClient.getHeaders(),
                     body: JSON.stringify(formData)
                 });
+                
+                // Si no está autorizado, redirigir al login
+                if (response.status === 401) {
+                    console.log('Token expired or invalid, redirecting to login');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
                 
                 const data = await response.json();
                 

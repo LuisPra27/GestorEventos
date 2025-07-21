@@ -137,8 +137,8 @@
             </div>
             <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee; font-size: 0.9rem; color: #666;">
                 <strong>Cuentas de prueba:</strong><br>
-                <strong>Gerente:</strong> admin@eventos.com / password<br>
-                <strong>Empleado:</strong> empleado@eventos.com / password
+                <strong>Gerente:</strong> admin@gestor.com / admin123<br>
+                <strong>Empleado:</strong> empleado@gestor.com / empleado123
             </div>
         </form>
     </div>
@@ -218,17 +218,19 @@
             }
         });
 
-        // Auto-rellenar campos para pruebas rápidas
+
+        // Limpiar localStorage al cargar la página de login
         document.addEventListener('DOMContentLoaded', function() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
             const urlParams = new URLSearchParams(window.location.search);
             const role = urlParams.get('role');
-            
             if (role === 'admin') {
-                document.getElementById('email').value = 'admin@eventos.com';
-                document.getElementById('password').value = 'password';
+                document.getElementById('email').value = 'admin@gestor.com';
+                document.getElementById('password').value = 'admin123';
             } else if (role === 'employee') {
-                document.getElementById('email').value = 'empleado@eventos.com';
-                document.getElementById('password').value = 'password';
+                document.getElementById('email').value = 'empleado@gestor.com';
+                document.getElementById('password').value = 'empleado123';
             }
         });
 
@@ -257,8 +259,7 @@
             }
         }
 
-        // Verificar estado de autenticación al cargar la página
-        checkAuthStatus();
+        // checkAuthStatus(); // Eliminado para evitar redirección automática al dashboard
     </script>
 </body>
 </html>

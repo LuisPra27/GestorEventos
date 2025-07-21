@@ -254,7 +254,7 @@
                 email: document.getElementById('email').value,
                 telefono: document.getElementById('telefono').value,
                 password: password,
-                confirm_password: confirmPassword
+                password_confirmation: confirmPassword
             };
 
             try {
@@ -262,6 +262,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });

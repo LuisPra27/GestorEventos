@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    // Usar la tabla existente 'servicios'
-    protected $table = 'servicios';
+    // Usar la tabla 'services' creada por la migración
+    protected $table = 'services';
 
     protected $fillable = [
         'nombre',

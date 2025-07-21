@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Event extends Model
 {
-    // Usar la tabla existente 'eventos'
-    protected $table = 'eventos';
+    // Usar la tabla 'events' creada por la migración
+    protected $table = 'events';
 
     protected $fillable = [
         'titulo',
@@ -19,7 +19,7 @@ class Event extends Model
         'ubicacion',
         'numero_invitados',
         'presupuesto',
-        'requisitos_especiales',
+        'notas_especiales',
         'estado',
     ];
 
@@ -32,17 +32,17 @@ class Event extends Model
     }
 
     // Relaciones
-    public function cliente()
+    public function user()
     {
         return $this->belongsTo(User::class, 'cliente_id');
     }
 
-    public function empleado()
+    public function employee()
     {
         return $this->belongsTo(User::class, 'empleado_id');
     }
 
-    public function servicio()
+    public function service()
     {
         return $this->belongsTo(Service::class, 'servicio_id');
     }

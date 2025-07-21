@@ -11,8 +11,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
 
-    // Usar la tabla existente 'usuarios'
-    protected $table = 'usuarios';
+    // Usar la tabla 'users' creada por la migración
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.

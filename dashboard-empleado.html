@@ -678,7 +678,21 @@
 
         async function viewEventDetails(eventId) {
             try {
-                const response = await fetch(`backend/api/events.php?action=details&id=${eventId}`);
+                const response = await fetch(`http://localhost:8000/api/events/${eventId}`, { 
+                    headers: ApiClient.getHeaders() 
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 if (data.success) {
@@ -778,19 +792,27 @@
             errorAlert.style.display = 'none';
             
             const formData = {
-                action: 'update_status',
-                evento_id: document.getElementById('statusEventId').value,
                 estado: document.getElementById('newStatus').value
             };
             
             try {
-                const response = await fetch('http://localhost:8000/api/events', {
+                const eventId = document.getElementById('statusEventId').value;
+                const response = await fetch(`http://localhost:8000/api/events/${eventId}/change-status`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: ApiClient.getHeaders(),
                     body: JSON.stringify(formData)
                 });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.log('Token expired or invalid, redirecting to login');
+                        localStorage.removeItem('auth_token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
@@ -857,19 +879,27 @@
 
         async function addFollowupComment(eventId, comentario, tipo) {
             const formData = {
-                action: 'add_followup',
-                evento_id: eventId,
-                comentario: comentario,
+                descripcion: comentario,
+                fecha_seguimiento: new Date().toISOString().split('T')[0], // Fecha actual
                 tipo: tipo
             };
             
-            const response = await fetch('http://localhost:8000/api/events', {
+            const response = await fetch(`http://localhost:8000/api/events/${eventId}/seguimientos`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: ApiClient.getHeaders(),
                 body: JSON.stringify(formData)
             });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.log('Token expired or invalid, redirecting to login');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             
             const data = await response.json();
             

@@ -1325,11 +1325,21 @@
 
         async function toggleUserStatus(userId) {
             try {
-                const response = await fetch('http://localhost:8000/api/users', {
+                const response = await fetch(`http://localhost:8000/api/users/${userId}/toggle-status`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'toggle_status', id: userId })
+                    headers: ApiClient.getHeaders()
                 });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 if (data.success) {
@@ -1345,11 +1355,21 @@
 
         async function toggleServiceStatus(serviceId) {
             try {
-                const response = await fetch('http://localhost:8000/api/services', {
+                const response = await fetch(`http://localhost:8000/api/services/${serviceId}/toggle-status`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'toggle_status', id: serviceId })
+                    headers: ApiClient.getHeaders()
                 });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 if (data.success) {
@@ -1385,11 +1405,23 @@
             
             try {
                 const method = formData.id ? 'PUT' : 'POST';
-                const response = await fetch('http://localhost:8000/api/users', {
+                const url = formData.id ? `http://localhost:8000/api/users/${formData.id}` : 'http://localhost:8000/api/users';
+                const response = await fetch(url, {
                     method: method,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: ApiClient.getHeaders(),
                     body: JSON.stringify(formData)
                 });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
@@ -1428,11 +1460,23 @@
             
             try {
                 const method = formData.id ? 'PUT' : 'POST';
-                const response = await fetch('http://localhost:8000/api/services', {
+                const url = formData.id ? `http://localhost:8000/api/services/${formData.id}` : 'http://localhost:8000/api/services';
+                const response = await fetch(url, {
                     method: method,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: ApiClient.getHeaders(),
                     body: JSON.stringify(formData)
                 });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
@@ -1600,18 +1644,28 @@
             errorAlert.style.display = 'none';
             
             const formData = {
-                action: 'assign_employee',
-                event_id: document.getElementById('assignEventId').value,
-                employee_id: document.getElementById('employeeSelect').value,
+                empleado_id: document.getElementById('employeeSelect').value,
                 notas: document.getElementById('assignNotes').value
             };
             
             try {
-                const response = await fetch('http://localhost:8000/api/events', {
+                const eventId = document.getElementById('assignEventId').value;
+                const response = await fetch(`http://localhost:8000/api/events/${eventId}/assign-employee`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: ApiClient.getHeaders(),
                     body: JSON.stringify(formData)
                 });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.log('Token expired or invalid, redirecting to login');
+                        localStorage.removeItem('auth_token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
@@ -1644,18 +1698,28 @@
             errorAlert.style.display = 'none';
             
             const formData = {
-                action: 'change_status',
-                event_id: document.getElementById('statusEventId').value,
                 estado: document.getElementById('newEventStatus').value,
                 notas: document.getElementById('statusNotes').value
             };
             
             try {
-                const response = await fetch('http://localhost:8000/api/events', {
+                const eventId = document.getElementById('statusEventId').value;
+                const response = await fetch(`http://localhost:8000/api/events/${eventId}/change-status`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: ApiClient.getHeaders(),
                     body: JSON.stringify(formData)
                 });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.log('Token expired or invalid, redirecting to login');
+                        localStorage.removeItem('auth_token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
