@@ -144,34 +144,34 @@
     </div>
     <script>
         // Configuración de la API
-        const API_BASE_URL = 'http://localhost:8000/api';
+        const API_BASE_URL = "http://localhost:8000/api";
 
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const errorAlert = document.getElementById('errorAlert');
-            const successAlert = document.getElementById('successAlert');
+            const submitBtn = document.getElementById("submitBtn");
+            const loadingIndicator = document.getElementById("loadingIndicator");
+            const errorAlert = document.getElementById("errorAlert");
+            const successAlert = document.getElementById("successAlert");
 
             // Resetear alertas
-            errorAlert.style.display = 'none';
-            successAlert.style.display = 'none';
+            errorAlert.style.display = "none";
+            successAlert.style.display = "none";
 
             // Mostrar loading
             submitBtn.disabled = true;
-            loadingIndicator.style.display = 'block';
+            loadingIndicator.style.display = "block";
 
             const formData = {
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value
             };
 
             try {
                 const response = await fetch(`${API_BASE_URL}/login`, {
-                    method: 'POST',
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
                     },
                     body: JSON.stringify(formData)
                 });
@@ -179,27 +179,27 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    successAlert.textContent = 'Inicio de sesión exitoso';
-                    successAlert.style.display = 'block';
+                    successAlert.textContent = "Inicio de sesión exitoso";
+                    successAlert.style.display = "block";
 
                     // Guardar token y datos del usuario en localStorage
-                    localStorage.setItem('auth_token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem("auth_token", data.token);
+                    localStorage.setItem("user", JSON.stringify(data.user));
 
                     // Determinar redirección basada en el rol
                     let redirectUrl;
                     switch (data.user.rol_id) {
                         case 1:
-                            redirectUrl = 'dashboard-cliente.html';
+                            redirectUrl = "dashboard-cliente.html";
                             break;
                         case 2:
-                            redirectUrl = 'dashboard-empleado.html';
+                            redirectUrl = "dashboard-empleado.html";
                             break;
                         case 3:
-                            redirectUrl = 'dashboard-gerente.html';
+                            redirectUrl = "dashboard-gerente.html";
                             break;
                         default:
-                            redirectUrl = 'index.html';
+                            redirectUrl = "index.html";
                     }
 
                     // Redirigir después de un momento
@@ -207,48 +207,48 @@
                         window.location.href = redirectUrl;
                     }, 1000);
                 } else {
-                    throw new Error(data.message || 'Error en el login');
+                    throw new Error(data.message || "Error en el login");
                 }
             } catch (error) {
                 errorAlert.textContent = error.message;
-                errorAlert.style.display = 'block';
+                errorAlert.style.display = "block";
             } finally {
                 submitBtn.disabled = false;
-                loadingIndicator.style.display = 'none';
+                loadingIndicator.style.display = "none";
             }
         });
 
         // Auto-rellenar campos para pruebas rápidas
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener("DOMContentLoaded", function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const role = urlParams.get('role');
+            const role = urlParams.get("role");
             
-            if (role === 'admin') {
-                document.getElementById('email').value = 'admin@eventos.com';
-                document.getElementById('password').value = 'password';
-            } else if (role === 'employee') {
-                document.getElementById('email').value = 'empleado@eventos.com';
-                document.getElementById('password').value = 'password';
+            if (role === "admin") {
+                document.getElementById("email").value = "admin@eventos.com";
+                document.getElementById("password").value = "password";
+            } else if (role === "employee") {
+                document.getElementById("email").value = "empleado@eventos.com";
+                document.getElementById("password").value = "password";
             }
         });
 
         // Función para verificar si el usuario ya está autenticado
         function checkAuthStatus() {
-            const token = localStorage.getItem('auth_token');
-            const user = localStorage.getItem('user');
+            const token = localStorage.getItem("auth_token");
+            const user = localStorage.getItem("user");
             
             if (token && user) {
                 const userData = JSON.parse(user);
                 let redirectUrl;
                 switch (userData.rol_id) {
                     case 1:
-                        redirectUrl = 'dashboard-cliente.html';
+                        redirectUrl = "dashboard-cliente.html";
                         break;
                     case 2:
-                        redirectUrl = 'dashboard-empleado.html';
+                        redirectUrl = "dashboard-empleado.html";
                         break;
                     case 3:
-                        redirectUrl = 'dashboard-gerente.html';
+                        redirectUrl = "dashboard-gerente.html";
                         break;
                     default:
                         return;
