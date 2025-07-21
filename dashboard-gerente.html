@@ -486,7 +486,7 @@
         <div class="logo-section">
             <h1><i class="fas fa-crown"></i> Panel Gerencial</h1>
             <div class="user-info">
-                <span>Â¡Hola <strong id="userName">Gerente</strong>!</span>
+                <span>¡Hola <strong id="userName">Gerente</strong>!</span>
             </div>
         </div>
         
@@ -707,14 +707,14 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="userPhone">TelÃ©fono</label>
+                        <label for="userPhone">Teléfono</label>
                         <input type="tel" id="userPhone">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="userPassword">ContraseÃ±a *</label>
+                        <label for="userPassword">Contraseña *</label>
                         <input type="password" id="userPassword" required>
                     </div>
                     
@@ -762,7 +762,7 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="serviceDuration">DuraciÃ³n (horas)</label>
+                        <label for="serviceDuration">Duración (horas)</label>
                         <input type="number" id="serviceDuration" min="1" value="4">
                     </div>
                     
@@ -777,7 +777,7 @@
                 
                 <div class="form-row full-width">
                     <div class="form-group">
-                        <label for="serviceDescription">DescripciÃ³n</label>
+                        <label for="serviceDescription">Descripción</label>
                         <textarea id="serviceDescription" rows="3"></textarea>
                     </div>
                 </div>
@@ -798,7 +798,7 @@
             </div>
             
             <div id="eventDetailsContent">
-                <!-- Los detalles se cargarÃ¡n aquÃ­ -->
+                <!-- Los detalles se cargarán aquí -->
             </div>
             
             <div style="margin-top: 1rem;">
@@ -830,7 +830,7 @@
                 
                 <div class="form-group">
                     <label for="assignNotes">Notas (opcional)</label>
-                    <textarea id="assignNotes" rows="3" placeholder="Notas adicionales sobre la asignaciÃ³n..."></textarea>
+                    <textarea id="assignNotes" rows="3" placeholder="Notas adicionales sobre la asignación..."></textarea>
                 </div>
                 
                 <button type="submit" class="btn btn-success">
@@ -883,7 +883,7 @@
         let services = [];
         let events = [];
 
-        // Verificar autenticaciÃ³n al cargar la pÃ¡gina
+        // Verificar autenticación al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             const userData = localStorage.getItem('user');
             if (!userData) {
@@ -895,12 +895,12 @@
             
             // Verificar que sea un gerente
             if (currentUser.rol_id !== 3) {
-                alert('Acceso denegado. Esta pÃ¡gina es solo para gerentes.');
+                alert('Acceso denegado. Esta página es solo para gerentes.');
                 window.location.href = 'login.html';
                 return;
             }
             
-            // Actualizar informaciÃ³n del usuario en la UI
+            // Actualizar información del usuario en la UI
             document.getElementById('userName').textContent = currentUser.nombre;
             
             // Cargar datos iniciales
@@ -968,7 +968,7 @@
                 section.classList.remove('active');
             });
             
-            // Mostrar la secciÃ³n seleccionada
+            // Mostrar la sección seleccionada
             document.getElementById(sectionId).classList.add('active');
             
             // Actualizar navbar activo
@@ -976,14 +976,14 @@
                 btn.classList.remove('active');
             });
             
-            // Activar el botÃ³n correspondiente
+            // Activar el botón correspondiente
             const activeBtn = document.querySelector(`.nav-btn.${sectionId.replace('-', '')}`) || 
                              document.querySelector(`.nav-btn.dashboard`);
             if (activeBtn) {
                 activeBtn.classList.add('active');
             }
             
-            // Cargar datos especÃ­ficos de la secciÃ³n
+            // Cargar datos específicos de la sección
             if (sectionId === 'reports') {
                 generateReports();
             }
@@ -1078,7 +1078,7 @@
                 filteredEvents = filteredEvents.filter(event => event.estado === statusFilter);
             }
             
-            // Filtro por bÃºsqueda
+            // Filtro por búsqueda
             const searchTerm = document.getElementById('eventSearch').value.toLowerCase();
             if (searchTerm) {
                 filteredEvents = filteredEvents.filter(event => 
@@ -1092,7 +1092,7 @@
                 const eventDate = new Date(event.fecha_evento);
                 const tr = document.createElement('tr');
                 
-                // Determinar los botones de acciÃ³n
+                // Determinar los botones de acción
                 const hasEmployee = event.empleado_nombre && event.empleado_nombre !== 'Sin asignar';
                 const assignButton = hasEmployee 
                     ? `<button class="btn btn-warning" onclick="assignEmployee(${event.id})" title="Reasignar empleado">
@@ -1130,7 +1130,7 @@
 
         // Agregar event listeners para los filtros
         document.addEventListener('DOMContentLoaded', function() {
-            // ... cÃ³digo existente ...
+            // ... código existente ...
             
             // Event listeners para filtros
             document.getElementById('eventSearch').addEventListener('input', filterEvents);
@@ -1239,7 +1239,7 @@
             empHtml += '</ul>';
             document.getElementById('employeePerformance').innerHTML = empHtml;
             
-            // Tendencia mensual (Ãºltimos 6 meses)
+            // Tendencia mensual (últimos 6 meses)
             const monthlyData = {};
             const now = new Date();
             for (let i = 5; i >= 0; i--) {
@@ -1508,19 +1508,19 @@
             const detailsHtml = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
-                        <h4>InformaciÃ³n General</h4>
-                        <p><strong>TÃ­tulo:</strong> ${event.titulo}</p>
-                        <p><strong>DescripciÃ³n:</strong> ${event.descripcion || 'Sin descripciÃ³n'}</p>
+                        <h4>Información General</h4>
+                        <p><strong>Título:</strong> ${event.titulo}</p>
+                        <p><strong>Descripción:</strong> ${event.descripcion || 'Sin descripción'}</p>
                         <p><strong>Estado:</strong> <span class="status-badge status-${event.estado}">${event.estado.replace('_', ' ').toUpperCase()}</span></p>
                         <p><strong>Fecha del Evento:</strong> ${eventDate.toLocaleDateString('es-ES')} ${event.hora || ''}</p>
-                        <p><strong>UbicaciÃ³n:</strong> ${event.ubicacion || 'Sin especificar'}</p>
-                        <p><strong>NÃºmero de Invitados:</strong> ${event.numero_invitados || 'Sin especificar'}</p>
+                        <p><strong>Ubicación:</strong> ${event.ubicacion || 'Sin especificar'}</p>
+                        <p><strong>Número de Invitados:</strong> ${event.numero_invitados || 'Sin especificar'}</p>
                     </div>
                     <div>
                         <h4>Cliente y Servicio</h4>
                         <p><strong>Cliente:</strong> ${event.cliente_nombre}</p>
                         <p><strong>Email Cliente:</strong> ${event.cliente_email}</p>
-                        <p><strong>TelÃ©fono Cliente:</strong> ${event.cliente_telefono || 'Sin telÃ©fono'}</p>
+                        <p><strong>Teléfono Cliente:</strong> ${event.cliente_telefono || 'Sin teléfono'}</p>
                         <p><strong>Servicio:</strong> ${event.servicio_nombre}</p>
                         <p><strong>Precio:</strong> $${event.servicio_precio}</p>
                         <p><strong>Empleado Asignado:</strong> ${event.empleado_nombre || 'Sin asignar'}</p>
@@ -1551,7 +1551,7 @@
                 return;
             }
             
-            // Actualizar el tÃ­tulo del modal basado en si ya tiene empleado
+            // Actualizar el título del modal basado en si ya tiene empleado
             const hasEmployee = event.empleado_nombre && event.empleado_nombre !== 'Sin asignar';
             const modalTitle = hasEmployee ? 'Reasignar Empleado' : 'Asignar Empleado';
             document.querySelector('#assignEmployeeModal .modal-header h2').textContent = modalTitle;
@@ -1588,7 +1588,7 @@
             document.getElementById('assignError').style.display = 'none';
             document.getElementById('assignNotes').value = '';
             
-            // Actualizar texto del botÃ³n
+            // Actualizar texto del botón
             const submitBtn = document.querySelector('#assignEmployeeForm button[type="submit"]');
             if (hasEmployee) {
                 submitBtn.innerHTML = '<i class="fas fa-user-edit"></i> Reasignar Empleado';
@@ -1633,7 +1633,7 @@
             document.getElementById('changeStatusForm').reset();
         }
 
-        // Manejar formulario de asignaciÃ³n de empleado
+        // Manejar formulario de asignación de empleado
         document.getElementById('assignEmployeeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1743,7 +1743,7 @@
                 localStorage.removeItem('user');
                 window.location.href = 'index.html';
             } catch (error) {
-                console.error('Error al cerrar sesiÃ³n:', error);
+                console.error('Error al cerrar sesión:', error);
             }
         }
 
