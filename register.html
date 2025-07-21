@@ -4,7 +4,9 @@
     <script src="js/api-utils.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Gestor de Eventos</title>
+    <title>Regist                <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
+                <br><br>
+                <a href="index.html">← Volver al inicio</a>- Gestor de Eventos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -173,7 +175,7 @@
 
             <div class="form-group">
                 <label for="telefono">
-                    <i class="fas fa-phone"></i> TelÃ©fono
+                    <i class="fas fa-phone"></i> Teléfono
                 </label>
                 <input type="tel" id="telefono" name="telefono" placeholder="Ej: +1234567890">
             </div>
@@ -181,7 +183,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="password">
-                        <i class="fas fa-lock"></i> ContraseÃ±a *
+                        <i class="fas fa-lock"></i> Contraseña *
                     </label>
                     <input type="password" id="password" name="password" required>
                 </div>
@@ -195,10 +197,10 @@
             </div>
 
             <div class="password-requirements">
-                <strong>Requisitos de contraseÃ±a:</strong>
+                <strong>Requisitos de contraseña:</strong>
                 <ul>
-                    <li>MÃ­nimo 6 caracteres</li>
-                    <li>Las contraseÃ±as deben coincidir</li>
+                    <li>Mínimo 6 caracteres</li>
+                    <li>Las contraseñas deben coincidir</li>
                 </ul>
             </div>
 
@@ -227,18 +229,18 @@
             errorAlert.style.display = 'none';
             successAlert.style.display = 'none';
             
-            // Validar contraseÃ±as
+            // Validar contraseñas
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
             
             if (password !== confirmPassword) {
-                errorAlert.textContent = 'Las contraseÃ±as no coinciden';
+                errorAlert.textContent = 'Las contraseñas no coinciden';
                 errorAlert.style.display = 'block';
                 return;
             }
             
             if (password.length < 6) {
-                errorAlert.textContent = 'La contraseÃ±a debe tener al menos 6 caracteres';
+                errorAlert.textContent = 'La contraseña debe tener al menos 6 caracteres';
                 errorAlert.style.display = 'block';
                 return;
             }
@@ -286,7 +288,7 @@
             }
         });
 
-        // ValidaciÃ³n en tiempo real de contraseÃ±as
+        // Validación en tiempo real de contraseñas
         document.getElementById('confirm_password').addEventListener('input', function() {
             const password = document.getElementById('password').value;
             const confirmPassword = this.value;

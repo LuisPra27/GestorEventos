@@ -366,7 +366,7 @@
             </div>
             
             <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Cerrar SesiÃ³n
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
             </button>
         </aside>
 
@@ -398,7 +398,7 @@
                     </div>
                 </div>
 
-                <h3>PrÃ³ximos Eventos</h3>
+                <h3>Próximos Eventos</h3>
                 <div id="upcomingEvents" class="events-grid"></div>
             </section>
 
@@ -504,7 +504,7 @@
         let currentUser = null;
         let events = [];
 
-        // Verificar autenticaciÃ³n al cargar la pÃ¡gina
+        // Verificar autenticación al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             const userData = localStorage.getItem('user');
             if (!userData) {
@@ -516,12 +516,12 @@
             
             // Verificar que sea un empleado
             if (currentUser.rol_id !== 2) {
-                alert('Acceso denegado. Esta pÃ¡gina es solo para empleados.');
+                alert('Acceso denegado. Esta página es solo para empleados.');
                 window.location.href = 'login.html';
                 return;
             }
             
-            // Actualizar informaciÃ³n del usuario en la UI
+            // Actualizar información del usuario en la UI
             document.getElementById('userName').textContent = currentUser.nombre;
             document.getElementById('userEmail').textContent = currentUser.email;
             
@@ -535,16 +535,16 @@
                 section.classList.remove('active');
             });
             
-            // Mostrar la secciÃ³n seleccionada
+            // Mostrar la sección seleccionada
             document.getElementById(sectionId).classList.add('active');
             
-            // Actualizar navegaciÃ³n activa
+            // Actualizar navegación activa
             document.querySelectorAll('.sidebar nav a').forEach(link => {
                 link.classList.remove('active');
             });
             event.target.classList.add('active');
             
-            // Cargar datos especÃ­ficos de la secciÃ³n
+            // Cargar datos específicos de la sección
             if (sectionId === 'my-events' || sectionId === 'pending-events') {
                 loadEvents();
             }
@@ -586,7 +586,7 @@
             container.innerHTML = '';
             
             if (events.length === 0) {
-                container.innerHTML = '<p>No tienes eventos asignados aÃºn.</p>';
+                container.innerHTML = '<p>No tienes eventos asignados aún.</p>';
                 return;
             }
             
@@ -624,7 +624,7 @@
                 .slice(0, 3);
             
             if (upcomingEvents.length === 0) {
-                container.innerHTML = '<p>No tienes eventos prÃ³ximos.</p>';
+                container.innerHTML = '<p>No tienes eventos próximos.</p>';
                 return;
             }
             
@@ -655,10 +655,10 @@
                 <p><strong>Cliente:</strong> ${event.cliente_nombre} (${event.cliente_email})</p>
                 <p><strong>Servicio:</strong> ${event.servicio_nombre}</p>
                 <p><strong>Fecha:</strong> ${formattedDate}</p>
-                <p><strong>UbicaciÃ³n:</strong> ${event.ubicacion}</p>
+                <p><strong>Ubicación:</strong> ${event.ubicacion}</p>
                 <p><strong>Invitados:</strong> ${event.numero_invitados}</p>
-                ${event.cliente_telefono ? `<p><strong>TelÃ©fono:</strong> ${event.cliente_telefono}</p>` : ''}
-                ${event.descripcion ? `<p><strong>DescripciÃ³n:</strong> ${event.descripcion}</p>` : ''}
+                ${event.cliente_telefono ? `<p><strong>Teléfono:</strong> ${event.cliente_telefono}</p>` : ''}
+                ${event.descripcion ? `<p><strong>Descripción:</strong> ${event.descripcion}</p>` : ''}
                 
                 <div class="event-actions">
                     <button class="btn" onclick="viewEventDetails(${event.id})">
@@ -717,13 +717,13 @@
                             <p><strong>Estado:</strong> <span class="event-status status-${event.estado}">${event.estado.replace('_', ' ').toUpperCase()}</span></p>
                             <p><strong>Cliente:</strong> ${event.cliente_nombre}</p>
                             <p><strong>Email:</strong> ${event.cliente_email}</p>
-                            ${event.cliente_telefono ? `<p><strong>TelÃ©fono:</strong> ${event.cliente_telefono}</p>` : ''}
+                            ${event.cliente_telefono ? `<p><strong>Teléfono:</strong> ${event.cliente_telefono}</p>` : ''}
                             <p><strong>Servicio:</strong> ${event.servicio_nombre} - $${event.servicio_precio}</p>
                             <p><strong>Fecha:</strong> ${formattedDate}</p>
-                            <p><strong>UbicaciÃ³n:</strong> ${event.ubicacion}</p>
-                            <p><strong>NÃºmero de invitados:</strong> ${event.numero_invitados}</p>
+                            <p><strong>Ubicación:</strong> ${event.ubicacion}</p>
+                            <p><strong>Número de invitados:</strong> ${event.numero_invitados}</p>
                             ${event.presupuesto ? `<p><strong>Presupuesto:</strong> $${event.presupuesto}</p>` : ''}
-                            ${event.descripcion ? `<p><strong>DescripciÃ³n:</strong> ${event.descripcion}</p>` : ''}
+                            ${event.descripcion ? `<p><strong>Descripción:</strong> ${event.descripcion}</p>` : ''}
                             ${event.notas_especiales ? `<p><strong>Notas especiales:</strong> ${event.notas_especiales}</p>` : ''}
                         </div>
                         ${followupsHtml}
@@ -807,7 +807,7 @@
                     // Recargar eventos
                     loadEvents();
                     
-                    // Cerrar modal despuÃ©s de un momento
+                    // Cerrar modal después de un momento
                     setTimeout(() => {
                         closeStatusModal();
                     }, 2000);
@@ -844,7 +844,7 @@
                     // Limpiar formulario
                     document.getElementById('followupForm').reset();
                     
-                    // Cerrar modal despuÃ©s de un momento
+                    // Cerrar modal después de un momento
                     setTimeout(() => {
                         closeFollowupModal();
                     }, 2000);
@@ -886,7 +886,7 @@
                 localStorage.removeItem('user');
                 window.location.href = 'index.html';
             } catch (error) {
-                console.error('Error al cerrar sesiÃ³n:', error);
+                console.error('Error al cerrar sesión:', error);
             }
         }
 
