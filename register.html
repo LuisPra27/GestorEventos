@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+    <script src="js/api-utils.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Gestor de Eventos</title>
@@ -172,7 +173,7 @@
 
             <div class="form-group">
                 <label for="telefono">
-                    <i class="fas fa-phone"></i> Teléfono
+                    <i class="fas fa-phone"></i> TelÃ©fono
                 </label>
                 <input type="tel" id="telefono" name="telefono" placeholder="Ej: +1234567890">
             </div>
@@ -180,7 +181,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="password">
-                        <i class="fas fa-lock"></i> Contraseña *
+                        <i class="fas fa-lock"></i> ContraseÃ±a *
                     </label>
                     <input type="password" id="password" name="password" required>
                 </div>
@@ -194,10 +195,10 @@
             </div>
 
             <div class="password-requirements">
-                <strong>Requisitos de contraseña:</strong>
+                <strong>Requisitos de contraseÃ±a:</strong>
                 <ul>
-                    <li>Mínimo 6 caracteres</li>
-                    <li>Las contraseñas deben coincidir</li>
+                    <li>MÃ­nimo 6 caracteres</li>
+                    <li>Las contraseÃ±as deben coincidir</li>
                 </ul>
             </div>
 
@@ -206,9 +207,9 @@
             </button>
 
             <div class="links">
-                <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
+                <a href="login.html">Â¿Ya tienes cuenta? Inicia sesiÃ³n</a>
                 <br><br>
-                <a href="index.html">← Volver al inicio</a>
+                <a href="index.html">â† Volver al inicio</a>
             </div>
         </form>
     </div>
@@ -226,18 +227,18 @@
             errorAlert.style.display = 'none';
             successAlert.style.display = 'none';
             
-            // Validar contraseñas
+            // Validar contraseÃ±as
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
             
             if (password !== confirmPassword) {
-                errorAlert.textContent = 'Las contraseñas no coinciden';
+                errorAlert.textContent = 'Las contraseÃ±as no coinciden';
                 errorAlert.style.display = 'block';
                 return;
             }
             
             if (password.length < 6) {
-                errorAlert.textContent = 'La contraseña debe tener al menos 6 caracteres';
+                errorAlert.textContent = 'La contraseÃ±a debe tener al menos 6 caracteres';
                 errorAlert.style.display = 'block';
                 return;
             }
@@ -255,7 +256,7 @@
             };
 
             try {
-                const response = await fetch('backend/auth/register.php', {
+                const response = await fetch('http://localhost:8000/api/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -265,11 +266,11 @@
 
                 const data = await response.json();
 
-                if (data.success) {
-                    successAlert.textContent = data.message + ' Serás redirigido al login...';
+                if (response.ok) {
+                    successAlert.textContent = data.message + ' SerÃ¡s redirigido al login...';
                     successAlert.style.display = 'block';
                     
-                    // Redirigir después de un momento
+                    // Redirigir despuÃ©s de un momento
                     setTimeout(() => {
                         window.location.href = data.redirect;
                     }, 2000);
@@ -285,7 +286,7 @@
             }
         });
 
-        // Validación en tiempo real de contraseñas
+        // ValidaciÃ³n en tiempo real de contraseÃ±as
         document.getElementById('confirm_password').addEventListener('input', function() {
             const password = document.getElementById('password').value;
             const confirmPassword = this.value;
@@ -299,3 +300,4 @@
     </script>
 </body>
 </html>
+

@@ -65,6 +65,48 @@ class AuthController extends Controller
         ]);
     }
 
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:usuarios',
+            'password' => 'required|string|min:6|confirmed',
+            'telefono' => 'nullable|string|max:20'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        $user = User::create([
+            'nombre' => $request->nombre,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'telefono' => $request->telefono,
+            'rol_id' => 1, // Cliente por defecto
+            'activo' => true
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario registrado exitosamente',
+            'user' => [
+                'id' => $user->id,
+                'nombre' => $user->nombre,
+                'email' => $user->email,
+                'rol_id' => $user->rol_id,
+                'rol_nombre' => 'cliente'
+            ],
+            'token' => $token,
+            'redirect' => 'dashboard-cliente.html'
+        ], 201);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
