@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado del Sistema - Gestor de Eventos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .service-card.online {
+            border-left-color: #27ae60;
+        }
+        
+        .service-card.offline {
+            border-left-color: #e74c3c;
+        }
+        
+        .service-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .service-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-checking {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .service-details {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .refresh-btn {
+            display: block;
+            margin: 2rem auto;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .last-update {
+            text-align: center;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .checking {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐳 Estado del Sistema Docker</h1>
+            <p>Gestor de Eventos - Monitoreo en tiempo real</p>
+        </div>
+        
+        <div class="last-update">
+            Última actualización: <span id="lastUpdate">--</span>
+        </div>
+        
+        <div class="status-grid">
+            <div class="service-card" id="frontend-card">
+                <div class="service-header">
+                    <div class="service-name">🌐 Frontend (Nginx)</div>
+                    <span class="status-badge status-checking" id="frontend-status">Verificando...</span>
+                </div>
+                <div class="service-details">
+                    <div>Puerto: 80</div>
+                    <div>Contenedor: gestor_eventos_frontend</div>
+                    <div id="frontend-details">Sirviendo aplicación web estática</div>
+                </div>
+            </div>
+            
+            <div class="service-card" id="backend-card">
+                <div class="service-header">
+                    <div class="service-name">⚡ Backend (Laravel)</div>
+                    <span class="status-badge status-checking" id="backend-status">Verificando...</span>
+                </div>
+                <div class="service-details">
+                    <div>Puerto: 8000</div>
+                    <div>Contenedor: gestor_eventos_backend</div>
+                    <div id="backend-details">API REST y lógica de negocio</div>
+                </div>
+            </div>
+            
+            <div class="service-card" id="database-card">
+                <div class="service-header">
+                    <div class="service-name">🗄️ Base de Datos (PostgreSQL)</div>
+                    <span class="status-badge status-checking" id="database-status">Verificando...</span>
+                </div>
+                <div class="service-details">
+                    <div>Puerto: 5432</div>
+                    <div>Contenedor: gestor_eventos_db</div>
+                    <div id="database-details">Almacenamiento de datos</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="refresh-btn" onclick="checkAllServices()">🔄 Actualizar Estado</button>
+    </div>
+
+    <script>
+        async function checkService(serviceName, endpoint) {
+            try {
+                const response = await fetch(endpoint, { 
+                    method: 'GET', 
+                    timeout: 5000 
+                });
+                
+                if (response.ok) {
+                    updateServiceStatus(serviceName, 'online', 'Servicio funcionando correctamente');
+                } else {
+                    updateServiceStatus(serviceName, 'offline', `Error: ${response.status} - ${response.statusText}`);
+                }
+            } catch (error) {
+                updateServiceStatus(serviceName, 'offline', `Error de conexión: ${error.message}`);
+            }
+        }
+
+        function updateServiceStatus(serviceName, status, details) {
+            const card = document.getElementById(`${serviceName}-card`);
+            const statusBadge = document.getElementById(`${serviceName}-status`);
+            const detailsElement = document.getElementById(`${serviceName}-details`);
+            
+            // Actualizar clases CSS
+            card.className = `service-card ${status}`;
+            statusBadge.className = `status-badge status-${status}`;
+            statusBadge.textContent = status === 'online' ? '✅ En línea' : '❌ Sin conexión';
+            
+            // Actualizar detalles
+            if (detailsElement) {
+                detailsElement.textContent = details;
+            }
+        }
+
+        async function checkAllServices() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('es-ES');
+            
+            // Marcar todos como "verificando"
+            ['frontend', 'backend', 'database'].forEach(service => {
+                const card = document.getElementById(`${service}-card`);
+                const status = document.getElementById(`${service}-status`);
+                card.classList.add('checking');
+                status.textContent = 'Verificando...';
+                status.className = 'status-badge status-checking';
+            });
+
+            // Verificar cada servicio
+            await Promise.allSettled([
+                // Frontend siempre está disponible si estamos viendo esta página
+                new Promise(resolve => {
+                    setTimeout(() => {
+                        updateServiceStatus('frontend', 'online', 'Sirviendo aplicación web correctamente');
+                        document.getElementById('frontend-card').classList.remove('checking');
+                        resolve();
+                    }, 500);
+                }),
+                
+                // Backend API
+                checkService('backend', '/api/health').then(() => {
+                    document.getElementById('backend-card').classList.remove('checking');
+                }),
+                
+                // Base de datos (a través del backend)
+                fetch('/api/health', { method: 'GET' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                    })
+                    .then(data => {
+                        if (data.status === 'ok' && data.database === 'connected') {
+                            updateServiceStatus('database', 'online', 'Base de datos conectada y operativa');
+                        } else {
+                            updateServiceStatus('database', 'offline', 'Error de conexión con la base de datos');
+                        }
+                        document.getElementById('database-card').classList.remove('checking');
+                    })
+                    .catch(() => {
+                        updateServiceStatus('database', 'offline', 'Base de datos no accesible');
+                        document.getElementById('database-card').classList.remove('checking');
+                    })
+            ]);
+        }
+
+        // Verificar servicios al cargar la página
+        document.addEventListener('DOMContentLoaded', checkAllServices);
+        
+        // Actualizar automáticamente cada 30 segundos
+        setInterval(checkAllServices, 30000);
+    </script>
+</body>
+</html>

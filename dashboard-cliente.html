@@ -940,15 +940,14 @@
             errorAlert.style.display = 'none';
             
             const formData = {
-                action: 'create',
                 servicio_id: document.getElementById('eventService').value,
                 titulo: document.getElementById('eventTitle').value,
                 descripcion: document.getElementById('eventDescription').value,
                 fecha_evento: document.getElementById('eventDate').value,
                 ubicacion: document.getElementById('eventLocation').value,
-                numero_invitados: document.getElementById('eventGuests').value,
-                presupuesto: document.getElementById('eventBudget').value,
-                notas_especiales: document.getElementById('eventNotes').value
+                numero_invitados: parseInt(document.getElementById('eventGuests').value) || 1,
+                presupuesto: parseFloat(document.getElementById('eventBudget').value) || null,
+                requisitos_especiales: document.getElementById('eventNotes').value
             };
             
             try {

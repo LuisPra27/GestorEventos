@@ -1,0 +1,89 @@
+services:
+  # 1. CONTENEDOR BASE DE DATOS - PostgreSQL
+  database:
+    image: postgres:15-alpine
+    container_name: gestor_eventos_db
+    environment:
+      POSTGRES_DB: eventos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: luis123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=es_ES.UTF-8 --lc-ctype=es_ES.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gestor_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d eventos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. CONTENEDOR BACKEND - Laravel API
+  backend:
+    build:
+      context: ./LARAVEL
+      dockerfile: Dockerfile
+    container_name: gestor_eventos_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./LARAVEL:/var/www/html
+    environment:
+      - APP_NAME=GestorEventos
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=pgsql
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_DATABASE=eventos
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=luis123
+      - APP_URL=http://localhost:8000
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - gestor_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 3. CONTENEDOR FRONTEND - Nginx + HTML/CSS/JS
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: gestor_eventos_frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./logs/nginx:/var/log/nginx
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - gestor_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  gestor_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

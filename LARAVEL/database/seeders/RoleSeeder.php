@@ -37,6 +37,9 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        DB::table('roles')->insert($roles);
+        // Verificar si ya existen roles antes de insertar
+        if (DB::table('roles')->count() == 0) {
+            DB::table('roles')->insert($roles);
+        }
     }
 }
