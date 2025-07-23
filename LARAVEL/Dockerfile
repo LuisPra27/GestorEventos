@@ -15,8 +15,6 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpq-dev \
     libzip-dev \
-    nginx \
-    supervisor \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -42,4 +40,4 @@ RUN chown -R www-data:www-data /var/www/html \
 EXPOSE 8000
 
 # Comando de inicio
-CMD ["sh", "-c", "php artisan migrate --force; php artisan db:seed --force || true; php artisan serve --host=0.0.0.0 --port=8000"]
+CMD ["sh", "-c", "php artisan migrate --force; php artisan serve --host=0.0.0.0 --port=8000"]

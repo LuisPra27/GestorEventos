@@ -184,7 +184,7 @@
                 </div>
                 <div class="service-details">
                     <div>Puerto: 5432</div>
-                    <div>Contenedor: gestor_eventos_db</div>
+                    <div>Contenedor: gestor_base_datos</div>
                     <div id="database-details">Almacenamiento de datos</div>
                 </div>
             </div>
@@ -227,6 +227,69 @@
             }
         }
 
+        async function checkFrontendStatus() {
+            // Primero verificar desde dónde estamos accediendo
+            if (window.location.protocol === 'file:') {
+                // Estamos abriendo desde archivo local, intentar verificar si Docker está funcionando
+                try {
+                    // Crear un iframe invisible para verificar si localhost responde
+                    const testFrame = document.createElement('iframe');
+                    testFrame.style.display = 'none';
+                    testFrame.src = 'http://localhost/';
+                    
+                    const timeoutId = setTimeout(() => {
+                        updateServiceStatus('frontend', 'offline', 'Contenedor nginx no responde - abre http://localhost para acceso completo');
+                        document.body.removeChild(testFrame);
+                        document.getElementById('frontend-card').classList.remove('checking');
+                    }, 3000);
+                    
+                    testFrame.onload = () => {
+                        clearTimeout(timeoutId);
+                        updateServiceStatus('frontend', 'online', 'Contenedor nginx funcionando - recomendado usar http://localhost');
+                        document.body.removeChild(testFrame);
+                        document.getElementById('frontend-card').classList.remove('checking');
+                    };
+                    
+                    testFrame.onerror = () => {
+                        clearTimeout(timeoutId);
+                        updateServiceStatus('frontend', 'offline', 'Contenedor nginx no accesible desde archivo local');
+                        document.body.removeChild(testFrame);
+                        document.getElementById('frontend-card').classList.remove('checking');
+                    };
+                    
+                    document.body.appendChild(testFrame);
+                } catch (error) {
+                    updateServiceStatus('frontend', 'offline', 'No se puede verificar desde archivo local - usar http://localhost');
+                    document.getElementById('frontend-card').classList.remove('checking');
+                }
+                return;
+            }
+            
+            // Si estamos en http://localhost, verificar el estado del contenedor
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                updateServiceStatus('frontend', 'online', 'Contenedor nginx funcionando - página servida desde Docker');
+                document.getElementById('frontend-card').classList.remove('checking');
+                return;
+            }
+            
+            // Para otros casos, intentar verificación por fetch
+            try {
+                const response = await fetch('http://localhost/', { 
+                    method: 'HEAD',
+                    timeout: 3000
+                });
+                
+                if (response.ok || response.type === 'opaque') {
+                    updateServiceStatus('frontend', 'online', 'Servidor web nginx funcionando correctamente');
+                } else {
+                    updateServiceStatus('frontend', 'offline', `Nginx responde con error: ${response.status}`);
+                }
+            } catch (error) {
+                updateServiceStatus('frontend', 'offline', `Error de conexión: ${error.message}`);
+            }
+            document.getElementById('frontend-card').classList.remove('checking');
+        }
+
         async function checkAllServices() {
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('es-ES');
             
@@ -241,14 +304,8 @@
 
             // Verificar cada servicio
             await Promise.allSettled([
-                // Frontend siempre está disponible si estamos viendo esta página
-                new Promise(resolve => {
-                    setTimeout(() => {
-                        updateServiceStatus('frontend', 'online', 'Sirviendo aplicación web correctamente');
-                        document.getElementById('frontend-card').classList.remove('checking');
-                        resolve();
-                    }, 500);
-                }),
+                // Frontend - verificar que el servidor nginx esté respondiendo
+                checkFrontendStatus(),
                 
                 // Backend API
                 checkService('backend', 'http://localhost:8000/api/health').then(() => {

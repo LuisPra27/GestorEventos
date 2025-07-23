@@ -2,7 +2,7 @@ services:
   # 1. CONTENEDOR BASE DE DATOS - PostgreSQL
   database:
     image: postgres:15-alpine
-    container_name: gestor_eventos_db
+    container_name: gestor_base_datos
     environment:
       POSTGRES_DB: eventos
       POSTGRES_USER: postgres
@@ -29,8 +29,6 @@ services:
     container_name: gestor_eventos_backend
     ports:
       - "8000:8000"
-    volumes:
-      - ./LARAVEL:/var/www/html
     environment:
       - APP_NAME=GestorEventos
       - APP_ENV=production
@@ -49,10 +47,11 @@ services:
       - gestor_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health", "||", "exit", "1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   # 3. CONTENEDOR FRONTEND - Nginx + HTML/CSS/JS
   frontend:
