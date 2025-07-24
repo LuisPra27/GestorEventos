@@ -1,4 +1,5 @@
-# Usar PHP 8.2 con FPM
+# BACKEND
+#Usar PHP 8.2 con FPM
 FROM php:8.2-fpm
 
 # Establecer el directorio de trabajo

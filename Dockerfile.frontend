@@ -1,4 +1,4 @@
-# Usar Nginx Alpine para menor tamaño
+# Usar Nginx Alpine
 FROM nginx:alpine
 
 # Instalar curl para healthchecks
