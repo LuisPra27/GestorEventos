@@ -1,0 +1,5 @@
+2025/07/29 03:41:42 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:96
+2025/07/29 03:41:48 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:96
+2025/07/29 03:41:55 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:96
+2025/07/29 03:47:29 [error] 22#22: *14 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 172.20.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost", referrer: "http://localhost/"
+2025/07/29 03:47:29 [error] 22#22: *14 open() "/usr/share/nginx/html/404.html" failed (2: No such file or directory), client: 172.20.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost", referrer: "http://localhost/"

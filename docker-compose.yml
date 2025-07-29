@@ -12,6 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database-init:/docker-entrypoint-initdb.d
     networks:
       - gestor_network
     restart: unless-stopped
@@ -76,8 +77,34 @@ services:
       timeout: 10s
       retries: 3
 
+  # 4. CONTENEDOR BACKUP - Backup automático de PostgreSQL
+  backup:
+    image: prodrigestivill/postgres-backup-local:15
+    container_name: gestor_backup
+    environment:
+      - POSTGRES_HOST=database
+      - POSTGRES_DB=eventos
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=luis123
+      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+    volumes:
+      - backup_data:/backups
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - gestor_network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+    driver: local
+  backup_data:
     driver: local
 
 networks:
