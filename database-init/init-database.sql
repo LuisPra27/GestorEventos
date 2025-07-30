@@ -173,12 +173,12 @@ INSERT INTO roles (nombre, descripcion) VALUES
 
 -- Servicios básicos
 INSERT INTO services (nombre, descripcion, precio, duracion_horas, activo) VALUES 
-('Boda Completa', 'Organización completa de boda incluyendo decoración, catering y música', 5000.00, 8, true),
+('Boda Completa', 'Organización completa de boda incluyendo decoración, catering y música', 500.00, 8, true),
 ('Fiesta de Cumpleaños', 'Organización de fiesta de cumpleaños con decoración temática', 800.00, 4, true),
-('Evento Corporativo', 'Organización de eventos empresariales y conferencias', 2500.00, 6, true),
+('Evento Corporativo', 'Organización de eventos empresariales y conferencias', 250.00, 6, true),
 ('Baby Shower', 'Organización de baby shower con decoración y catering', 600.00, 3, true),
-('Graduación', 'Celebración de graduación con ceremonia y recepción', 1200.00, 5, true),
-('Aniversario', 'Celebración de aniversario de bodas', 1500.00, 6, true);
+('Graduación', 'Celebración de graduación con ceremonia y recepción', 120.00, 5, true),
+('Aniversario', 'Celebración de aniversario de bodas', 150.00, 6, true);
 
 -- Usuarios del sistema
 INSERT INTO users (nombre, email, password, telefono, rol_id, activo) VALUES 
