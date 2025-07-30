@@ -7,14 +7,14 @@ docker-compose down 2>$null
 
 # Construir y levantar con SSL
 Write-Host "🏗️ Construyendo contenedores con SSL..." -ForegroundColor Yellow
-docker-compose -f docker-compose-ssl.yml up --build -d
+docker-compose up --build -d
 
 Write-Host "⏳ Esperando que los servicios se inicializen..." -ForegroundColor Yellow
 Start-Sleep -Seconds 30
 
 # Verificar estado
 Write-Host "🔍 Verificando estado de los contenedores..." -ForegroundColor Yellow
-docker-compose -f docker-compose-ssl.yml ps
+docker-compose ps
 
 Write-Host ""
 Write-Host "✅ ¡Gestor de Eventos con SSL está listo!" -ForegroundColor Green
@@ -28,6 +28,6 @@ Write-Host ""
 Write-Host "⚠️  NOTA: El certificado es autofirmado, acepta la advertencia de seguridad del navegador" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "📋 Comandos útiles:" -ForegroundColor Cyan
-Write-Host "   Ver logs: docker-compose -f docker-compose-ssl.yml logs -f" -ForegroundColor White
-Write-Host "   Detener:  docker-compose -f docker-compose-ssl.yml down" -ForegroundColor White
-Write-Host "   Estado:   docker-compose -f docker-compose-ssl.yml ps" -ForegroundColor White
+Write-Host "   Ver logs: docker-compose logs -f" -ForegroundColor White
+Write-Host "   Detener:  docker-compose down" -ForegroundColor White
+Write-Host "   Estado:   docker-compose ps" -ForegroundColor White

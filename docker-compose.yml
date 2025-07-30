@@ -2,7 +2,7 @@ services:
   # 1. CONTENEDOR BASE DE DATOS-PostgreSQL
   database:
     image: postgres:15-alpine
-    container_name: gestor_base_datos
+    container_name: gestor_base_datos_ssl
     environment:
       POSTGRES_DB: eventos
       POSTGRES_USER: postgres
@@ -11,10 +11,10 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_ssl:/var/lib/postgresql/data
       - ./database-init:/docker-entrypoint-initdb.d
     networks:
-      - gestor_network
+      - gestor_network_ssl
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d eventos"]
@@ -27,7 +27,7 @@ services:
     build:
       context: ./LARAVEL
       dockerfile: Dockerfile
-    container_name: gestor_eventos_backend
+    container_name: gestor_eventos_backend_ssl
     ports:
       - "8000:8000"
     environment:
@@ -40,12 +40,12 @@ services:
       - DB_DATABASE=eventos
       - DB_USERNAME=postgres
       - DB_PASSWORD=luis123
-      - APP_URL=http://localhost:8000
+      - APP_URL=https://localhost
     depends_on:
       database:
         condition: service_healthy
     networks:
-      - gestor_network
+      - gestor_network_ssl
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health", "||", "exit", "1"]
@@ -54,14 +54,15 @@ services:
       retries: 3
       start_period: 40s
 
-  # 3. CONTENEDOR FRONTEND - Nginx + HTML/CSS/JS
+  # 3. CONTENEDOR FRONTEND - Nginx con SSL
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: gestor_eventos_frontend
+    container_name: gestor_eventos_frontend_ssl
     ports:
-      - "80:80"
+      - "80:80"     # HTTP (redirige a HTTPS)
+      - "443:443"   # HTTPS
     volumes:
       - ./logs/nginx:/var/log/nginx
     environment:
@@ -69,10 +70,10 @@ services:
     depends_on:
       - backend
     networks:
-      - gestor_network
+      - gestor_network_ssl
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "curl", "-f", "https://localhost", "-k"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -80,7 +81,7 @@ services:
   # 4. CONTENEDOR BACKUP - Backup automático de PostgreSQL
   backup:
     image: prodrigestivill/postgres-backup-local:15
-    container_name: gestor_backup
+    container_name: gestor_backup_ssl
     environment:
       - POSTGRES_HOST=database
       - POSTGRES_DB=eventos
@@ -93,23 +94,23 @@ services:
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=8080
     volumes:
-      - backup_data:/backups
+      - backup_data_ssl:/backups
     depends_on:
       database:
         condition: service_healthy
     networks:
-      - gestor_network
+      - gestor_network_ssl
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres_data_ssl:
     driver: local
-  backup_data:
+  backup_data_ssl:
     driver: local
 
 networks:
-  gestor_network:
+  gestor_network_ssl:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.21.0.0/16
