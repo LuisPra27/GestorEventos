@@ -363,6 +363,80 @@ section{
     padding-right: .5rem;
 }
 
+.price .box-container .box h3{
+    color: #fff;
+    font-size: 2.5rem;
+    padding: 1rem 0;
+    background: var(--main-color);
+    margin-bottom: 1rem;
+}
+
+.price .box-container .box .price{
+    color: #fff;
+    font-size: 3rem;
+    padding: 1rem 0;
+    font-weight: bold;
+}
+
+.price .box-container .box .price span{
+    font-size: 1.5rem;
+    color: #ccc;
+}
+
+.price .box-container .box .list{
+    padding: 1rem 2rem;
+}
+
+.price .box-container .box .list p{
+    color: #eee;
+    font-size: 1.4rem;
+    padding: 0.5rem 0;
+    text-align: left;
+}
+
+.loading-message,
+.no-services-message,
+.error-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: #fff;
+    font-size: 1.8rem;
+}
+
+.loading-message i {
+    font-size: 3rem;
+    color: var(--main-color);
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.no-services-message {
+    background: #444;
+    border-radius: 0.5rem;
+    border: 2px dashed #666;
+}
+
+.no-services-message i {
+    font-size: 4rem;
+    color: #999;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    background: #5a2d2d;
+    border-radius: 0.5rem;
+    border: 2px solid #ff4757;
+}
+
+.error-message i {
+    font-size: 4rem;
+    color: #ff4757;
+    display: block;
+    margin-bottom: 1rem;
+}
+
 .reivew .box{
     border-radius: .5rem;
     background: #333;

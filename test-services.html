@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Services API</title>
+</head>
+<body>
+    <h1>Test de Servicios API</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testServices() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Cargando servicios...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/services');
+                const data = await response.json();
+                
+                console.log('Response:', data);
+                
+                if (data.success && data.data) {
+                    resultDiv.innerHTML = `
+                        <h2>Servicios cargados correctamente:</h2>
+                        <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h2>Error:</h2>
+                        <p>La respuesta no contiene datos válidos</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <h2>Error de conexión:</h2>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Ejecutar la prueba cuando cargue la página
+        document.addEventListener('DOMContentLoaded', testServices);
+    </script>
+</body>
+</html>
