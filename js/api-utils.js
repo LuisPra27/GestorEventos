@@ -1,4 +1,4 @@
-// Configuración global de la API
+// Configuracion global de la API
 const API_BASE_URL = "http://localhost:8000/api";
 
 // Funciones utilitarias para la API
@@ -57,7 +57,7 @@ class ApiClient {
     }
 }
 
-// Funciones de autenticación
+// Funciones de autenticacion
 function getCurrentUser() {
     const userStr = localStorage.getItem("user");
     return userStr ? JSON.parse(userStr) : null;
@@ -87,7 +87,7 @@ function logout() {
     });
 }
 
-// Función para verificar roles
+// Funcion para verificar roles
 function hasRole(roleId) {
     const user = getCurrentUser();
     return user && user.rol_id === roleId;
@@ -95,7 +95,7 @@ function hasRole(roleId) {
 
 function requireRole(roleId) {
     if (!hasRole(roleId)) {
-        alert("No tienes permisos para acceder a esta función");
+        alert("No tienes permisos para acceder a esta funcion");
         return false;
     }
     return true;

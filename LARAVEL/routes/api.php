@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\EventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Rutas públicas
+// Rutas publicas
 Route::get('/health', function () {
     try {
         DB::connection()->getPdo();
@@ -32,7 +32,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/events', [EventController::class, 'index']);
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
-    // Autenticación
+    // Autenticacion
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 

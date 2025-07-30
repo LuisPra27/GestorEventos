@@ -69,7 +69,7 @@ var swiper = new Swiper(".review-slider", {
   }
 });
 
-// Cargar servicios dinámicamente desde la API
+// Cargar servicios dinamicamente desde la API
 document.addEventListener('DOMContentLoaded', function() {
     loadServices();
 });
@@ -78,7 +78,7 @@ async function loadServices() {
     const priceContainer = document.getElementById('priceContainer');
     
     try {
-        // Usar fetch directo ya que no necesitamos autenticación para ver servicios públicos
+        // Usar fetch directo ya que no necesitamos autenticacion para ver servicios publicos
         const response = await fetch('http://localhost:8000/api/services');
         const data = await response.json();
         
@@ -105,10 +105,10 @@ async function loadServices() {
                         <div class="price">$${parseFloat(service.precio).toFixed(2)} <span>/ ${service.duracion_horas}hrs</span></div>
                         <div class="list">
                             <p><i class="fas fa-info-circle"></i> ${service.descripcion || 'Servicio profesional de alta calidad'}</p>
-                            <p><i class="fas fa-check"></i> Duración: ${service.duracion_horas} horas</p>
+                            <p><i class="fas fa-check"></i> Duracion: ${service.duracion_horas} horas</p>
                             <p><i class="fas fa-check"></i> Servicio profesional</p>
-                            <p><i class="fas fa-check"></i> Atención personalizada</p>
-                            <p><i class="fas fa-check"></i> Garantía de calidad</p>
+                            <p><i class="fas fa-check"></i> Atencion personalizada</p>
+                            <p><i class="fas fa-check"></i> Garantia de calidad</p>
                         </div>
                         <a href="register.html" class="btn">elegir plan</a>
                     </div>
@@ -129,16 +129,16 @@ async function loadServices() {
         priceContainer.innerHTML = `
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
-                <p>Error al cargar los servicios. Por favor, intenta más tarde.</p>
+                <p>Error al cargar los servicios. Por favor, intenta mas tarde.</p>
             </div>
         `;
     }
 }
 
-// Función para refrescar los servicios (puede ser llamada externamente)
+// Funcion para refrescar los servicios (puede ser llamada externamente)
 function refreshServices() {
     loadServices();
 }
 
-// Hacer la función disponible globalmente
+// Hacer la funcion disponible globalmente
 window.refreshServices = refreshServices;

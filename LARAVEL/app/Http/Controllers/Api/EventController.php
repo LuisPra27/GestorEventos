@@ -308,7 +308,7 @@ class EventController extends Controller
                 ], 404);
             }
 
-            // Verificar permisos según el rol
+            // Verificar permisos segun el rol
             if ($user->rol_id == 1 && !in_array($request->estado, ['cancelado'])) {
                 return response()->json([
                     'success' => false,
@@ -361,8 +361,8 @@ class EventController extends Controller
                 ], 404);
             }
 
-            // Aquí podrías crear un seguimiento si tienes esa funcionalidad
-            // Por ahora solo devolvemos éxito
+            // Aqui podrias crear un seguimiento si tienes esa funcionalidad
+            // Por ahora solo devolvemos exito
 
             return response()->json([
                 'success' => true,
