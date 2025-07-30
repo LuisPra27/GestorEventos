@@ -12,7 +12,8 @@ class ServiceController extends Controller
     public function index()
     {
         try {
-            $services = Service::where('activo', true)->get();
+            // Obtener todos los servicios (activos e inactivos) para el panel gerencial
+            $services = Service::all();
 
             return response()->json([
                 'success' => true,
@@ -22,6 +23,24 @@ class ServiceController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Error al obtener servicios: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function indexActive()
+    {
+        try {
+            // Obtener solo servicios activos para clientes
+            $services = Service::where('activo', true)->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $services
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al obtener servicios activos: ' . $e->getMessage()
             ], 500);
         }
     }

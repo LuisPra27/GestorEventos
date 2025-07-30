@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Servicios
     Route::get('/services', [ServiceController::class, 'index']);
+    Route::get('/services/active', [ServiceController::class, 'indexActive']); // Solo servicios activos para clientes
     Route::middleware('role:3')->group(function () {
         Route::post('/services', [ServiceController::class, 'store']);
         Route::put('/services/{service}', [ServiceController::class, 'update']);

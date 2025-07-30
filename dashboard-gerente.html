@@ -208,6 +208,10 @@
             text-align: center;
         }
 
+        .stat-card.inactive {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+        }
+
         .stat-card h3 {
             font-size: 2rem;
             margin-bottom: 0.5rem;
@@ -529,6 +533,10 @@
                     <h3 id="totalServices">0</h3>
                     <p>Servicios Activos</p>
                 </div>
+                <div class="stat-card inactive">
+                    <h3 id="inactiveServices">0</h3>
+                    <p>Servicios Inactivos</p>
+                </div>
                 <div class="stat-card">
                     <h3 id="totalEvents">0</h3>
                     <p>Eventos Totales</p>
@@ -558,7 +566,16 @@
             <div class="section-header">
                 <h2>Gestión de Usuarios</h2>
                 <div class="action-buttons">
+                    <select id="userRoleFilter" onchange="filterUsersByRole()">
+                        <option value="">Todos los roles</option>
+                        <option value="1">Clientes</option>
+                        <option value="2">Empleados</option>
+                        <option value="3">Gerentes</option>
+                    </select>
                     <input type="text" placeholder="Buscar usuarios..." class="search-bar" id="userSearch">
+                    <button class="btn btn-info" onclick="openUserModal(null, 'employee')">
+                        <i class="fas fa-user-tie"></i> Nuevo Empleado
+                    </button>
                     <button class="btn btn-success" onclick="openUserModal()">
                         <i class="fas fa-plus"></i> Nuevo Usuario
                     </button>
@@ -587,6 +604,11 @@
             <div class="section-header">
                 <h2>Gestión de Servicios</h2>
                 <div class="action-buttons">
+                    <select id="serviceStatusFilter" onchange="filterServicesByStatus()">
+                        <option value="">Todos los estados</option>
+                        <option value="1">Activos</option>
+                        <option value="0">Inactivos</option>
+                    </select>
                     <input type="text" placeholder="Buscar servicios..." class="search-bar" id="serviceSearch">
                     <button class="btn btn-success" onclick="openServiceModal()">
                         <i class="fas fa-plus"></i> Nuevo Servicio
@@ -991,7 +1013,10 @@
 
         function updateDashboardStats() {
             document.getElementById('totalUsers').textContent = users.length;
+            // Mostrar información de servicios en stats
             document.getElementById('totalServices').textContent = services.filter(s => s.activo).length;
+            document.getElementById('inactiveServices').textContent = services.filter(s => !s.activo).length;
+            
             document.getElementById('totalEvents').textContent = events.length;
             document.getElementById('pendingEvents').textContent = events.filter(e => e.estado === 'pendiente').length;
             document.getElementById('activeEvents').textContent = events.filter(e => e.estado === 'en_progreso').length;
@@ -1017,14 +1042,33 @@
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '';
             
-            users.forEach(user => {
+            // Aplicar filtros
+            let filteredUsers = users;
+            
+            // Filtro por rol
+            const roleFilter = document.getElementById('userRoleFilter').value;
+            if (roleFilter) {
+                filteredUsers = filteredUsers.filter(user => user.rol_id == roleFilter);
+            }
+            
+            // Filtro por búsqueda
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            if (searchTerm) {
+                filteredUsers = filteredUsers.filter(user => 
+                    user.nombre.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm) ||
+                    (user.telefono && user.telefono.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            filteredUsers.forEach(user => {
                 const roles = {1: 'Cliente', 2: 'Empleado', 3: 'Gerente'};
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${user.id}</td>
                     <td>${user.nombre}</td>
                     <td>${user.email}</td>
-                    <td>${roles[user.rol_id]}</td>
+                    <td><span class="status-badge status-${user.rol_id === 2 ? 'activo' : (user.rol_id === 3 ? 'completado' : 'pendiente')}">${roles[user.rol_id]}</span></td>
                     <td>${user.telefono || '-'}</td>
                     <td><span class="status-badge status-${user.activo ? 'activo' : 'inactivo'}">${user.activo ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
@@ -1040,12 +1084,40 @@
             });
         }
 
+        function filterUsersByRole() {
+            displayUsers();
+        }
+
         function displayServices() {
             const tbody = document.getElementById('servicesTableBody');
             tbody.innerHTML = '';
             
-            services.forEach(service => {
+            // Aplicar filtros
+            let filteredServices = services;
+            
+            // Filtro por estado
+            const statusFilter = document.getElementById('serviceStatusFilter').value;
+            if (statusFilter !== "") {
+                filteredServices = filteredServices.filter(service => service.activo == statusFilter);
+            }
+            
+            // Filtro por búsqueda
+            const searchTerm = document.getElementById('serviceSearch').value.toLowerCase();
+            if (searchTerm) {
+                filteredServices = filteredServices.filter(service => 
+                    service.nombre.toLowerCase().includes(searchTerm) ||
+                    service.descripcion.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            filteredServices.forEach(service => {
                 const tr = document.createElement('tr');
+                // Añadir clase visual para servicios inactivos
+                if (!service.activo) {
+                    tr.style.opacity = '0.6';
+                    tr.style.backgroundColor = '#f8f9fa';
+                }
+                
                 tr.innerHTML = `
                     <td>${service.id}</td>
                     <td>${service.nombre}</td>
@@ -1053,16 +1125,20 @@
                     <td>${service.duracion_horas}</td>
                     <td><span class="status-badge status-${service.activo ? 'activo' : 'inactivo'}">${service.activo ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
-                        <button class="btn btn-info" onclick="editService(${service.id})">
+                        <button class="btn btn-info" onclick="editService(${service.id})" title="Editar servicio">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-warning" onclick="toggleServiceStatus(${service.id})">
+                        <button class="btn btn-warning" onclick="toggleServiceStatus(${service.id})" title="${service.activo ? 'Desactivar' : 'Activar'} servicio">
                             <i class="fas fa-toggle-${service.activo ? 'on' : 'off'}"></i>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function filterServicesByStatus() {
+            displayServices();
         }
 
         function displayEvents() {
@@ -1136,28 +1212,16 @@
             document.getElementById('eventSearch').addEventListener('input', filterEvents);
             document.getElementById('userSearch').addEventListener('input', filterUsers);
             document.getElementById('serviceSearch').addEventListener('input', filterServices);
+            document.getElementById('userRoleFilter').addEventListener('change', filterUsersByRole);
+            document.getElementById('serviceStatusFilter').addEventListener('change', filterServicesByStatus);
         });
 
         function filterUsers() {
-            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-            const tbody = document.getElementById('usersTableBody');
-            const rows = tbody.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+            displayUsers();
         }
 
         function filterServices() {
-            const searchTerm = document.getElementById('serviceSearch').value.toLowerCase();
-            const tbody = document.getElementById('servicesTableBody');
-            const rows = tbody.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+            displayServices();
         }
 
         function displayRecentActivity() {
@@ -1265,11 +1329,11 @@
         }
 
         // Funciones de modales y formularios
-        function openUserModal(userId = null) {
+        function openUserModal(userId = null, preset = null) {
             document.getElementById('userModal').style.display = 'block';
-            document.getElementById('userModalTitle').textContent = userId ? 'Editar Usuario' : 'Nuevo Usuario';
             
             if (userId) {
+                document.getElementById('userModalTitle').textContent = 'Editar Usuario';
                 const user = users.find(u => u.id === userId);
                 if (user) {
                     document.getElementById('userId').value = user.id;
@@ -1279,6 +1343,14 @@
                     document.getElementById('userPhone').value = user.telefono || '';
                     document.getElementById('userStatus').value = user.activo ? 'activo' : 'inactivo';
                     document.getElementById('userPassword').required = false;
+                }
+            } else {
+                // Pre-configurar para empleado si se especifica
+                if (preset === 'employee') {
+                    document.getElementById('userModalTitle').textContent = 'Nuevo Empleado';
+                    document.getElementById('userRole').value = '2'; // Rol de empleado
+                } else {
+                    document.getElementById('userModalTitle').textContent = 'Nuevo Usuario';
                 }
             }
         }
@@ -1354,6 +1426,21 @@
         }
 
         async function toggleServiceStatus(serviceId) {
+            // Encontrar el servicio para mostrar información en la confirmación
+            const service = services.find(s => s.id === serviceId);
+            if (!service) {
+                alert('Servicio no encontrado');
+                return;
+            }
+            
+            const action = service.activo ? 'desactivar' : 'activar';
+            const actionCapitalized = service.activo ? 'Desactivar' : 'Activar';
+            
+            // Confirmación antes de cambiar estado
+            if (!confirm(`¿Estás seguro de que quieres ${action} el servicio "${service.nombre}"?\n\n${service.activo ? 'El servicio quedará inactivo pero no se eliminará.' : 'El servicio volverá a estar disponible.'}`)) {
+                return;
+            }
+            
             try {
                 const response = await fetch(`http://localhost:8000/api/services/${serviceId}/toggle-status`, {
                     method: 'PUT',
@@ -1373,13 +1460,15 @@
                 
                 const data = await response.json();
                 if (data.success) {
-                    loadServices();
+                    // Mostrar mensaje de éxito
+                    alert(`Servicio "${service.nombre}" ${action}do correctamente.`);
+                    loadServices(); // Recargar la lista de servicios
                 } else {
-                    alert('Error al cambiar estado del servicio');
+                    alert('Error al cambiar estado del servicio: ' + (data.message || 'Error desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cambiar estado del servicio');
+                alert('Error al cambiar estado del servicio: ' + error.message);
             }
         }
 
