@@ -68,3 +68,77 @@ var swiper = new Swiper(".review-slider", {
       disableOnInteraction:false,
   }
 });
+
+// Cargar servicios dinámicamente desde la API
+document.addEventListener('DOMContentLoaded', function() {
+    loadServices();
+});
+
+async function loadServices() {
+    const priceContainer = document.getElementById('priceContainer');
+    
+    try {
+        // Usar fetch directo ya que no necesitamos autenticación para ver servicios públicos
+        const response = await fetch('http://localhost:8000/api/services');
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+            // Filtrar solo servicios activos
+            const activeServices = data.data.filter(service => service.activo);
+            
+            if (activeServices.length === 0) {
+                priceContainer.innerHTML = `
+                    <div class="no-services-message">
+                        <i class="fas fa-info-circle"></i>
+                        <p>No hay servicios disponibles en este momento.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Generar HTML para cada servicio
+            let servicesHTML = '';
+            activeServices.forEach(service => {
+                servicesHTML += `
+                    <div class="box">
+                        <h3>${service.nombre}</h3>
+                        <div class="price">$${parseFloat(service.precio).toFixed(2)} <span>/ ${service.duracion_horas}hrs</span></div>
+                        <div class="list">
+                            <p><i class="fas fa-info-circle"></i> ${service.descripcion || 'Servicio profesional de alta calidad'}</p>
+                            <p><i class="fas fa-check"></i> Duración: ${service.duracion_horas} horas</p>
+                            <p><i class="fas fa-check"></i> Servicio profesional</p>
+                            <p><i class="fas fa-check"></i> Atención personalizada</p>
+                            <p><i class="fas fa-check"></i> Garantía de calidad</p>
+                        </div>
+                        <a href="register.html" class="btn">elegir plan</a>
+                    </div>
+                `;
+            });
+            
+            priceContainer.innerHTML = servicesHTML;
+        } else {
+            priceContainer.innerHTML = `
+                <div class="no-services-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>No hay servicios disponibles en este momento.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading services:', error);
+        priceContainer.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Error al cargar los servicios. Por favor, intenta más tarde.</p>
+            </div>
+        `;
+    }
+}
+
+// Función para refrescar los servicios (puede ser llamada externamente)
+function refreshServices() {
+    loadServices();
+}
+
+// Hacer la función disponible globalmente
+window.refreshServices = refreshServices;

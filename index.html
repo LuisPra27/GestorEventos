@@ -267,66 +267,82 @@
 
     <h1 class="heading"> nuestros <span>precios</span> </h1>
 
-    <div class="box-container">
-
-        <div class="box">
-            <h3 class="title">cumpleaños</h3>
-            <h3 class="amount">$250.99</h3>
-            <ul>
-                <li><i class="fas fa-check"></i>servicios completos</li>
-                <li> <i class="fas fa-check"></i> decoraciones </li>
-                <li> <i class="fas fa-check"></i> música y fotografía </li>
-                <li> <i class="fas fa-check"></i> comida y bebidas </li>
-                <li> <i class="fas fa-check"></i> invitaciones </li>
-            </ul>
-            <a href="#" class="btn">contratar</a>
+    <div class="box-container" id="priceContainer">
+        <!-- Los precios se cargarán dinámicamente desde la base de datos -->
+        <div class="loading-message">
+            <i class="fas fa-spinner fa-spin"></i> Cargando servicios...
         </div>
-
-        <div class="box">
-            <h3 class="title">bodas</h3>
-            <h3 class="amount">$450.99</h3>
-            <ul>
-                <li><i class="fas fa-check"></i>servicios completos</li>
-                <li> <i class="fas fa-check"></i> decoraciones </li>
-                <li> <i class="fas fa-check"></i> música y fotografía </li>
-                <li> <i class="fas fa-check"></i> comida y bebidas </li>
-                <li> <i class="fas fa-check"></i> invitaciones </li>
-            </ul>
-            <a href="#" class="btn">contratar</a>
-        </div>
-
-        <div class="box">
-            <h3 class="title">conciertos</h3>
-            <h3 class="amount">$650.99</h3>
-            <ul>
-                <li><i class="fas fa-check"></i>servicios completos</li>
-                <li> <i class="fas fa-check"></i> decoraciones </li>
-                <li> <i class="fas fa-check"></i> música y fotografía </li>
-                <li> <i class="fas fa-check"></i> comida y bebidas </li>
-                <li> <i class="fas fa-check"></i> invitaciones </li>
-            </ul>
-            <a href="#" class="btn">contratar</a>
-        </div>
-
-        <div class="box">
-            <h3 class="title">otros eventos</h3>
-            <h3 class="amount">$850.99</h3>
-            <ul>
-                <li><i class="fas fa-check"></i>servicios completos</li>
-                <li> <i class="fas fa-check"></i> decoraciones </li>
-                <li> <i class="fas fa-check"></i> música y fotografía </li>
-                <li> <i class="fas fa-check"></i> comida y bebidas </li>
-                <li> <i class="fas fa-check"></i> invitaciones </li>
-            </ul>
-            <a href="#" class="btn">contratar</a>
-        </div>
-
     </div>
-
 
 </section>
 
 <!-- price section ends -->
+
+<!-- review section starts  -->
+
+<section class="reivew" id="review">
+
+    <h1 class="heading">reseñas de <span>clientes</span> </h1>
+
+    <div class="swiper-container review-slider">
+
+        <div class="swiper-wrapper">
+
+            <div class="swiper-slide box">
+                <i class="fas fa-quote-right"></i>
+                <div class="user">
+                    <img src="images/pic-1.png" alt="">
+                    <div class="user-info">
+                        <h3>Ana García</h3>
+                        <span>Cliente satisfecha</span>
+                    </div>
+                </div>
+                <p>Excelente servicio para la organización de mi boda. Todo salió perfecto, desde la decoración hasta el catering. Súper recomendable!</p>
+            </div>
+
+            <div class="swiper-slide box">
+                <i class="fas fa-quote-right"></i>
+                <div class="user">
+                    <img src="images/pic-2.png" alt="">
+                    <div class="user-info">
+                        <h3>Carlos Martínez</h3>
+                        <span>Evento corporativo</span>
+                    </div>
+                </div>
+                <p>Organizaron un evento corporativo increíble. Muy profesionales y atentos a cada detalle. Nuestros clientes quedaron impresionados.</p>
+            </div>
+
+            <div class="swiper-slide box">
+                <i class="fas fa-quote-right"></i>
+                <div class="user">
+                    <img src="images/pic-3.png" alt="">
+                    <div class="user-info">
+                        <h3>María López</h3>
+                        <span>Cumpleaños especial</span>
+                    </div>
+                </div>
+                <p>Hicieron de la fiesta de cumpleaños de mi hija algo mágico. La atención al detalle y la creatividad fueron excepcionales.</p>
+            </div>
+
+            <div class="swiper-slide box">
+                <i class="fas fa-quote-right"></i>
+                <div class="user">
+                    <img src="images/pic-4.png" alt="">
+                    <div class="user-info">
+                        <h3>Roberto Silva</h3>
+                        <span>Aniversario</span>
+                    </div>
+                </div>
+                <p>Celebramos nuestro 25 aniversario con ellos. Todo estuvo perfecto, desde la música hasta la comida. Una noche inolvidable.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- review section ends -->
 
 
 <!-- contact section starts  -->
@@ -436,6 +452,9 @@
 
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<!-- api utilities -->
+<script src="js/api-utils.js"></script>
 
 <!-- custom js file link  -->
 <script src="js/script.js"></script>
