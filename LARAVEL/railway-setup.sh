@@ -1,6 +1,34 @@
 #!/bin/bash
 
-# Railway Setup Script - Gestor de Eventos
+# Railway Setup Scrip# Ejecutar migraciones solo si la base de datos está disponible
+if [ ! -z "$PGHOST" ]; then
+    echo "📦 Iniciando configuración de base de datos..."
+
+    # Esperar a que la base de datos esté disponible
+    echo "⏳ Esperando conexión a la base de datos..."
+    timeout_counter=0
+    until timeout 15 php artisan tinker --execute="DB::connection()->getPdo(); echo 'OK';" 2>/dev/null | grep -q "OK"; do
+        echo "⏳ Base de datos no disponible, esperando 10 segundos... (intento $((++timeout_counter)))"
+        if [ $timeout_counter -ge 6 ]; then  # 60 segundos total
+            echo "❌ Timeout: No se pudo conectar a la base de datos después de 60 segundos"
+            exit 1
+        fi
+        sleep 10
+    done
+
+    echo "✅ Conexión a base de datos establecida"
+
+    # Usar nuestro comando de migración segura
+    echo "🔧 Ejecutando migraciones seguras..."
+    if php artisan migrate:safe --force; then
+        echo "✅ Migraciones completadas exitosamente"
+    else
+        echo "⚠️  Problemas con migraciones, intentando método tradicional..."
+        php artisan migrate --force || echo "❌ Error en migraciones tradicionales"
+    fi
+else
+    echo "⚠️  Saltando migraciones - Base de datos no configurada"
+fis
 # Este script se ejecuta automáticamente en Railway para configurar el entorno
 
 set -e

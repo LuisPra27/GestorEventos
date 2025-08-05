@@ -517,6 +517,9 @@
             <h1><i class="fas fa-crown"></i> Panel Gerencial</h1>
             <div class="user-info">
                 <span>Hola <strong id="userName">Gerente</strong>!</span>
+                <small id="roleCheckStatus" style="display: block; color: #4CAF50; font-size: 0.7rem; margin-top: 2px;">
+                    <i class="fas fa-shield-alt"></i> Sesión Protegida
+                </small>
             </div>
         </div>
         
@@ -972,6 +975,91 @@
         let users = [];
         let services = [];
         let events = [];
+        let roleCheckInterval = null;
+
+        // Función para verificar si el rol del usuario actual ha cambiado
+        async function checkCurrentUserRole() {
+            if (!currentUser || !currentUser.id) return;
+            
+            // Actualizar indicador visual
+            const statusElement = document.getElementById('roleCheckStatus');
+            if (statusElement) {
+                statusElement.innerHTML = '<i class="fas fa-sync fa-spin"></i> Verificando...';
+                statusElement.style.color = '#ff9800';
+            }
+            
+            try {
+                const response = await fetch(`https://back-end-production-fca9.up.railway.app/api/users/${currentUser.id}`, {
+                    headers: ApiClient.getHeaders()
+                });
+                
+                if (response.status === 401) {
+                    // Token expirado, cerrar sesión
+                    forceLogout('Tu sesión ha expirado');
+                    return;
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        const serverUser = data.data;
+                        
+                        // Verificar si el rol ha cambiado
+                        if (serverUser.rol_id !== currentUser.rol_id) {
+                            const roles = {1: 'Cliente', 2: 'Empleado', 3: 'Gerente'};
+                            const newRole = roles[serverUser.rol_id] || 'Desconocido';
+                            forceLogout(`Tu rol ha sido cambiado a ${newRole}. Debes iniciar sesión nuevamente.`);
+                            return;
+                        }
+                        
+                        // Verificar si la cuenta ha sido desactivada
+                        if (!serverUser.activo) {
+                            forceLogout('Tu cuenta ha sido desactivada por un administrador.');
+                            return;
+                        }
+                        
+                        // Actualizar datos del usuario en localStorage si han cambiado
+                        if (serverUser.nombre !== currentUser.nombre || 
+                            serverUser.email !== currentUser.email) {
+                            currentUser.nombre = serverUser.nombre;
+                            currentUser.email = serverUser.email;
+                            localStorage.setItem('user', JSON.stringify(currentUser));
+                            document.getElementById('userName').textContent = currentUser.nombre;
+                        }
+                        
+                        // Actualizar indicador visual - todo OK
+                        if (statusElement) {
+                            statusElement.innerHTML = '<i class="fas fa-shield-alt"></i> Sesión Protegida';
+                            statusElement.style.color = '#4CAF50';
+                        }
+                    }
+                } else {
+                    // Error de servidor, mostrar advertencia pero no forzar logout
+                    if (statusElement) {
+                        statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error de verificación';
+                        statusElement.style.color = '#f44336';
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking user role:', error);
+                // En caso de error de red, mostrar advertencia pero no forzar logout
+                if (statusElement) {
+                    statusElement.innerHTML = '<i class="fas fa-wifi"></i> Sin conexión';
+                    statusElement.style.color = '#f44336';
+                }
+            }
+        }
+
+        // Función para forzar el logout con mensaje
+        function forceLogout(message) {
+            alert(message);
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            if (roleCheckInterval) {
+                clearInterval(roleCheckInterval);
+            }
+            window.location.href = 'login.html';
+        }
 
         // Verificar autenticación al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
@@ -995,6 +1083,12 @@
             
             // Cargar datos iniciales
             loadAllData();
+            
+            // Iniciar verificación periódica del rol (cada 30 segundos)
+            roleCheckInterval = setInterval(checkCurrentUserRole, 30000);
+            
+            // Verificación inicial después de 5 segundos
+            setTimeout(checkCurrentUserRole, 5000);
         });
 
         async function loadAllData() {
@@ -1484,6 +1578,14 @@
                 const data = await response.json();
                 if (data.success) {
                     loadUsers();
+                    
+                    // Verificar si el usuario modificado es el usuario actual
+                    if (parseInt(userId) === currentUser.id) {
+                        // El usuario actual fue desactivado/activado, verificar su estado inmediatamente
+                        setTimeout(() => {
+                            checkCurrentUserRole();
+                        }, 1000);
+                    }
                 } else {
                     alert('Error al cambiar estado del usuario');
                 }
@@ -1633,6 +1735,16 @@
                     successAlert.textContent = data.message;
                     successAlert.style.display = 'block';
                     loadUsers();
+                    
+                    // Verificar si el usuario modificado es el usuario actual
+                    const modifiedUserId = parseInt(formData.id);
+                    if (modifiedUserId === currentUser.id) {
+                        // El usuario actual fue modificado, verificar su rol inmediatamente
+                        setTimeout(() => {
+                            checkCurrentUserRole();
+                        }, 1000);
+                    }
+                    
                     setTimeout(closeUserModal, 2000);
                 } else {
                     let errorMessage = data.error || 'Error al guardar usuario';
@@ -1960,11 +2072,24 @@
 
         async function logout() {
             try {
+                // Limpiar intervalo de verificación de rol
+                if (roleCheckInterval) {
+                    clearInterval(roleCheckInterval);
+                }
+                
                 await ApiClient.post('/logout');
                 localStorage.removeItem('user');
+                localStorage.removeItem('auth_token');
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error('Error al cerrar sesión:', error);
+                // Aún así limpiar datos locales y redirigir
+                if (roleCheckInterval) {
+                    clearInterval(roleCheckInterval);
+                }
+                localStorage.removeItem('user');
+                localStorage.removeItem('auth_token');
+                window.location.href = 'index.html';
             }
         }
 
