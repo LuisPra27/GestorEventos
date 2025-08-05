@@ -1,11 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+    <script src="js/api-utils.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Gestor de Eventos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">/
     <style>
         .login-container {
             min-height: 100vh;
@@ -143,9 +144,6 @@
         </form>
     </div>
     <script>
-        // Configuración de la API
-        const API_BASE_URL = 'http://localhost:8000/api';
-
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -167,18 +165,9 @@
             };
 
             try {
-                const response = await fetch(`${API_BASE_URL}/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
+                const data = await ApiClient.login(formData);
 
-                const data = await response.json();
-
-                if (response.ok) {
+                if (data.success) {
                     successAlert.textContent = 'Inicio de sesión exitoso';
                     successAlert.style.display = 'block';
 
