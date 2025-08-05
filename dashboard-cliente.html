@@ -589,22 +589,161 @@
         }
     </style>
     <script>
+        let currentUser = null;
+        let roleCheckInterval = null;
+
+        // Función para verificar si el rol del usuario actual ha cambiado
+        async function checkCurrentUserRole() {
+            console.log('🔍 Verificando rol del usuario en segundo plano...', currentUser);
+            
+            if (!currentUser || !currentUser.id) {
+                console.warn('⚠️ No hay usuario actual o ID');
+                return;
+            }
+            
+            try {
+                console.log('📡 Haciendo petición a API para usuario:', currentUser.id);
+                const response = await fetch(`https://back-end-production-fca9.up.railway.app/api/users/${currentUser.id}`, {
+                    headers: ApiClient.getHeaders(),
+                    signal: AbortSignal.timeout(8000) // Timeout de 8 segundos
+                });
+                
+                console.log('📨 Respuesta de API:', response.status);
+                
+                if (response.status === 401) {
+                    console.warn('🔒 Token expirado, cerrando sesión');
+                    forceLogout('Tu sesión ha expirado');
+                    return;
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📋 Datos del servidor:', data);
+                    
+                    if (data.success && data.data) {
+                        const serverUser = data.data;
+                        
+                        console.log('🔄 Comparando roles:', {
+                            local: currentUser.rol_id,
+                            servidor: serverUser.rol_id,
+                            diferente: serverUser.rol_id !== currentUser.rol_id
+                        });
+                        
+                        // Verificar si el rol ha cambiado
+                        if (serverUser.rol_id !== currentUser.rol_id) {
+                            const roles = {1: 'Cliente', 2: 'Empleado', 3: 'Gerente'};
+                            const newRole = roles[serverUser.rol_id] || 'Desconocido';
+                            console.warn('🚨 ROL CAMBIADO:', {
+                                anterior: roles[currentUser.rol_id],
+                                nuevo: newRole
+                            });
+                            
+                            // Logout inmediato
+                            forceLogout(`Tu rol ha sido cambiado a ${newRole}. Debes iniciar sesión nuevamente.`);
+                            return;
+                        }
+                        
+                        // Verificar si la cuenta ha sido desactivada
+                        if (!serverUser.activo) {
+                            console.warn('🚨 CUENTA DESACTIVADA');
+                            forceLogout('Tu cuenta ha sido desactivada por un administrador.');
+                            return;
+                        }
+                        
+                        // Actualizar datos del usuario en localStorage si han cambiado
+                        if (serverUser.nombre !== currentUser.nombre || 
+                            serverUser.email !== currentUser.email) {
+                            console.log('📝 Actualizando datos del usuario en segundo plano');
+                            currentUser.nombre = serverUser.nombre;
+                            currentUser.email = serverUser.email;
+                            localStorage.setItem('user', JSON.stringify(currentUser));
+                            document.getElementById('userName').textContent = currentUser.nombre;
+                        }
+                        
+                        // Verificación completada silenciosamente
+                        console.log('✅ Verificación completada en segundo plano - Usuario OK');
+                    } else {
+                        console.error('❌ Respuesta de API sin datos válidos:', data);
+                    }
+                } else {
+                    console.error('❌ Error en respuesta de API:', response.status);
+                    // Error de servidor, continuar sin notificar al usuario
+                }
+            } catch (error) {
+                console.error('💥 Error en verificación de rol (silencioso):', error);
+                // En caso de error de red, continuar sin notificar al usuario
+            }
+        }
+
+        // Función para forzar el logout con mensaje
+        function forceLogout(message) {
+            console.log('🚨 FORZANDO LOGOUT:', message);
+            
+            // Limpiar intervalo de verificación inmediatamente
+            if (roleCheckInterval) {
+                clearInterval(roleCheckInterval);
+                roleCheckInterval = null;
+                console.log('🔄 Intervalo de verificación limpiado');
+            }
+            
+            // Mostrar mensaje al usuario
+            alert(message);
+            
+            // Limpiar datos de localStorage
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            
+            // Limpiar variable global
+            currentUser = null;
+            
+            console.log('🔄 Datos de sesión limpiados, redirigiendo a login');
+            
+            // Redirigir a login
+            window.location.href = 'login.html';
+        }
+
         // Verificar autenticación al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando dashboard de cliente...');
+            
             if (!requireAuth()) return;
             
-            const user = getCurrentUser();
-            if (!user || user.rol_id !== 1) {
-                alert('Acceso denegado. Solo clientes pueden acceder a esta página.');
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                console.warn('❌ No hay datos de usuario, redirigiendo a login');
                 window.location.href = 'login.html';
                 return;
             }
             
-            // Mostrar nombre del usuario
+            currentUser = JSON.parse(userData);
+            console.log('👤 Usuario cargado:', currentUser);
+            
+            // Verificar que sea un cliente
+            if (currentUser.rol_id !== 1) {
+                console.warn('❌ Usuario no es cliente, rol:', currentUser.rol_id);
+                alert('Acceso denegado. Esta página es solo para clientes.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            console.log('✅ Usuario cliente verificado');
+
+            // Actualizar información del usuario en la UI
+            document.getElementById('userName').textContent = currentUser.nombre;
+            
+            // Mostrar nombre del usuario (compatibilidad con código existente)
             const userNameElement = document.querySelector('.user-name');
             if (userNameElement) {
-                userNameElement.textContent = user.nombre;
+                userNameElement.textContent = currentUser.nombre;
             }
+            
+            // Iniciar verificación periódica del rol (cada 30 segundos en segundo plano)
+            roleCheckInterval = setInterval(checkCurrentUserRole, 30000);
+            
+            // Verificación inicial después de 5 segundos
+            setTimeout(checkCurrentUserRole, 5000);
+            
+            console.log('🔄 Sistema de verificación de roles iniciado en segundo plano (cada 30 segundos)');
         });
     </script>
 </head>
@@ -742,36 +881,19 @@
     </div>
 
     <script>
-        let currentUser = null;
+        // currentUser ya está declarado en el script anterior
         let services = [];
         let events = [];
 
-        // Verificar autenticación al cargar la página
+        // Verificación ya realizada en el script anterior
+        // Solo cargar datos específicos del cliente
         document.addEventListener('DOMContentLoaded', function() {
-            const userData = localStorage.getItem('user');
-            if (!userData) {
-                window.location.href = 'login.html';
-                return;
+            // currentUser ya está configurado por el script principal
+            if (currentUser && currentUser.rol_id === 1) {
+                // Cargar datos iniciales
+                loadServices();
+                loadEvents();
             }
-            
-            currentUser = JSON.parse(userData);
-            
-            // Verificar que sea un cliente
-            if (currentUser.rol_id !== 1) {
-                alert('Acceso denegado. Esta página es solo para clientes.');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            // Actualizar información del usuario en la UI
-            document.getElementById('userName').textContent = currentUser.nombre;
-            if (document.getElementById('userEmail')) {
-                document.getElementById('userEmail').textContent = currentUser.email;
-            }
-            
-            // Cargar datos iniciales
-            loadServices();
-            loadEvents();
         });
 
         function showSection(sectionId) {
