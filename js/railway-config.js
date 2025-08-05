@@ -11,35 +11,30 @@ window.RAILWAY_CONFIG = {
             return 'http://localhost:8000/api';
         }
         
-        // En Railway
+        // En Railway - URL específica (CAMBIAR DESPUÉS DEL DESPLIEGUE)
         if (hostname.includes('railway.app')) {
-            // Método 1: URL específica del backend (recomendado)
-            // Cambiar esta URL por la real del backend después del despliegue
-            const backendUrl = prompt(
-                'Ingrese la URL del backend de Railway:', 
-                'https://gestor-eventos-backend-production.railway.app/api'
-            );
-            if (backendUrl && backendUrl.trim()) {
-                localStorage.setItem('backend_url', backendUrl.trim());
-                return backendUrl.trim();
+            // Configurar la URL real del backend aquí
+            const backendUrl = localStorage.getItem('backend_url');
+            if (backendUrl) {
+                return backendUrl;
             }
             
-            // Método 2: URL guardada previamente
-            const savedUrl = localStorage.getItem('backend_url');
-            if (savedUrl) {
-                return savedUrl;
-            }
-            
-            // Método 3: Intentar adivinar basado en el nombre del frontend
-            const parts = hostname.split('.');
-            if (parts.length > 0) {
-                const serviceName = parts[0].replace('frontend', 'backend').replace('gestor-eventos', 'gestor-eventos-backend');
-                return `https://${serviceName}.railway.app/api`;
-            }
+            // URL por defecto - CAMBIAR por la real del backend
+            return 'https://gestoreventos-backend-production.railway.app/api';
         }
         
         // Fallback
         return `${window.location.protocol}//${hostname}:8000/api`;
+    },
+    
+    // Función para configurar manualmente la URL del backend
+    setBackendUrl: function(url) {
+        if (url && url.trim()) {
+            localStorage.setItem('backend_url', url.trim());
+            console.log('✅ Backend URL configurada:', url.trim());
+            return true;
+        }
+        return false;
     },
     
     // Configuración de timeouts
@@ -59,9 +54,14 @@ window.RAILWAY_CONFIG = {
     DEBUG: window.location.hostname.includes('localhost')
 };
 
+// Función para configurar la URL del backend manualmente
+window.setBackendUrl = function(url) {
+    return window.RAILWAY_CONFIG.setBackendUrl(url);
+};
+
 // Función para testear la conexión al backend
 window.testBackendConnection = async function() {
-    const url = window.RAILWAY_CONFIG.getBackendUrl() + '/health';
+    const url = window.RAILWAY_CONFIG.getBackendUrl() + '/ping';
     
     try {
         const response = await fetch(url, {
@@ -83,6 +83,9 @@ window.testBackendConnection = async function() {
     }
 };
 
+console.log('🚀 Railway Config cargada. Backend URL:', window.RAILWAY_CONFIG.getBackendUrl());
+console.log('💡 Para configurar manualmente: setBackendUrl("https://tu-backend.railway.app/api")');
+
 // Auto-test en desarrollo
 if (window.RAILWAY_CONFIG.DEBUG) {
     window.addEventListener('load', () => {
@@ -91,5 +94,3 @@ if (window.RAILWAY_CONFIG.DEBUG) {
         }, 1000);
     });
 }
-
-console.log('🚀 Railway Config cargada:', window.RAILWAY_CONFIG.getBackendUrl());
