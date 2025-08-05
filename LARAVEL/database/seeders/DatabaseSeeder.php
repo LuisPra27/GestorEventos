@@ -1,13 +1,6 @@
 <?php
 
-na    public function run(): void
-    {
-        $this->call([
-            RoleSeeder::class,
-            ServiceSeeder::class,
-            UserSeeder::class,
-        ]);
-    }e Database\Seeders;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
@@ -20,6 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            ServiceSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
