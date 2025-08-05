@@ -266,18 +266,9 @@
             };
 
             try {
-                const response = await fetch('http://localhost:8000/api/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
+                const data = await ApiClient.register(formData);
 
-                const data = await response.json();
-
-                if (response.ok) {
+                if (data.success) {
                     successAlert.textContent = data.message + ' Serás redirigido al login...';
                     successAlert.style.display = 'block';
                     
@@ -286,7 +277,7 @@
                         window.location.href = data.redirect;
                     }, 2000);
                 } else {
-                    throw new Error(data.error || 'Error en el registro');
+                    throw new Error(data.message || 'Error en el registro');
                 }
             } catch (error) {
                 errorAlert.textContent = error.message;

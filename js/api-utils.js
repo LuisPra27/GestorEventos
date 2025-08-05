@@ -73,6 +73,15 @@ class ApiClient {
     static async delete(endpoint) {
         return this.request(endpoint, { method: "DELETE" });
     }
+
+    // Métodos de autenticación
+    static async login(credentials) {
+        return this.post("/login", credentials);
+    }
+
+    static async register(userData) {
+        return this.post("/register", userData);
+    }
 }
 
 // Funciones de autenticacion
