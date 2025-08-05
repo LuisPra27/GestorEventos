@@ -533,13 +533,13 @@
             <button class="nav-btn dashboard active" onclick="showSection('main-dashboard')">
                 <i class="fas fa-chart-line"></i> Dashboard
             </button>
-            <button class="nav-btn users" onclick="showSection('users')">
+            <button class="nav-btn users" onclick="showSection('users-management')">
                 <i class="fas fa-users"></i> Usuarios
             </button>
-            <button class="nav-btn services" onclick="showSection('services')">
+            <button class="nav-btn services" onclick="showSection('services-management')">
                 <i class="fas fa-concierge-bell"></i> Servicios
             </button>
-            <button class="nav-btn events" onclick="showSection('events')">
+            <button class="nav-btn events" onclick="showSection('events-management')">
                 <i class="fas fa-calendar-alt"></i> Eventos
             </button>
             <button class="nav-btn reports" onclick="showSection('reports')">
@@ -600,10 +600,13 @@
         </div>
 
         <!-- Users Section -->
-        <div id="users" class="content-section">
+        <div id="users-management" class="content-section">
             <div class="section-header">
                 <h2>Gestión de Usuarios</h2>
                 <div class="action-buttons">
+                    <button id="refresh-users-btn" class="btn btn-secondary" onclick="refreshUsers()" title="Actualizar lista de usuarios">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
                     <select id="userRoleFilter" onchange="filterUsersByRole()">
                         <option value="">Todos los roles</option>
                         <option value="1">Clientes</option>
@@ -638,10 +641,13 @@
         </div>
 
         <!-- Services Section -->
-        <div id="services" class="content-section">
+        <div id="services-management" class="content-section">
             <div class="section-header">
                 <h2>Gestión de Servicios</h2>
                 <div class="action-buttons">
+                    <button id="refresh-services-btn" class="btn btn-secondary" onclick="refreshServices()" title="Actualizar lista de servicios">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
                     <select id="serviceStatusFilter" onchange="filterServicesByStatus()">
                         <option value="">Todos los estados</option>
                         <option value="1">Activos</option>
@@ -671,10 +677,13 @@
         </div>
 
         <!-- Events Section -->
-        <div id="events" class="content-section">
+        <div id="events-management" class="content-section">
             <div class="section-header">
                 <h2>Gestión de Eventos</h2>
                 <div class="action-buttons">
+                    <button id="refresh-events-btn" class="btn btn-secondary" onclick="refreshEvents()" title="Actualizar lista de eventos">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
                     <input type="text" placeholder="Buscar eventos..." class="search-bar" id="eventSearch">
                     <select id="eventStatusFilter" onchange="filterEvents()">
                         <option value="">Todos los estados</option>
@@ -982,6 +991,12 @@
         let services = [];
         let events = [];
         let roleCheckInterval = null;
+        let dataPollingInterval = null;
+        let lastDataUpdate = {
+            users: Date.now(),
+            services: Date.now(),
+            events: Date.now()
+        };
 
         // Función para verificar si el rol del usuario actual ha cambiado
         async function checkCurrentUserRole() {
@@ -1155,10 +1170,14 @@
             // Iniciar verificación periódica del rol (cada 5 segundos para detección rápida)
             roleCheckInterval = setInterval(checkCurrentUserRole, 5000);
             
+            // Iniciar polling de datos (cada 30 segundos)
+            startDataPolling();
+            
             // Verificación inicial después de 2 segundos
             setTimeout(checkCurrentUserRole, 2000);
             
             console.log('🔄 Sistema de verificación de roles iniciado (cada 5 segundos)');
+            console.log('📊 Sistema de polling de datos iniciado (cada 30 segundos)');
         });
 
         async function loadAllData() {
@@ -1172,6 +1191,212 @@
             } catch (error) {
                 console.error('Error loading data:', error);
             }
+        }
+
+        // Función para iniciar el polling automático
+        function startDataPolling() {
+            // Limpiar polling anterior si existe
+            if (dataPollingInterval) {
+                clearInterval(dataPollingInterval);
+            }
+            
+            dataPollingInterval = setInterval(async () => {
+                console.log('🔄 Ejecutando polling automático de datos...');
+                
+                // Solo actualizar si la sección correspondiente está activa
+                const activeSection = document.querySelector('.content-section.active');
+                if (!activeSection) return;
+                
+                const sectionId = activeSection.id;
+                
+                try {
+                    if (sectionId === 'users-management' || sectionId === 'dashboard') {
+                        await refreshUsers(true); // Silencioso
+                    }
+                    
+                    if (sectionId === 'services-management' || sectionId === 'dashboard') {
+                        await refreshServices(true); // Silencioso
+                    }
+                    
+                    if (sectionId === 'events-management' || sectionId === 'dashboard') {
+                        await refreshEvents(true); // Silencioso
+                    }
+                    
+                    // Actualizar stats si estamos en dashboard
+                    if (sectionId === 'dashboard') {
+                        updateDashboardStats();
+                    }
+                } catch (error) {
+                    console.error('Error en polling automático:', error);
+                }
+            }, 30000); // Cada 30 segundos
+        }
+
+        // Función para detener el polling
+        function stopDataPolling() {
+            if (dataPollingInterval) {
+                clearInterval(dataPollingInterval);
+                dataPollingInterval = null;
+                console.log('⏹️ Polling de datos detenido');
+            }
+        }
+
+        // Función para mostrar cuándo fue la última actualización
+        function updateLastRefreshTime(section) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            
+            // Crear o actualizar el indicador de tiempo
+            let timeIndicator = document.getElementById(`${section}-last-update`);
+            if (!timeIndicator) {
+                // Crear el indicador si no existe
+                const sectionElement = document.getElementById(`${section}-management`);
+                if (sectionElement) {
+                    const header = sectionElement.querySelector('.section-header');
+                    if (header) {
+                        timeIndicator = document.createElement('small');
+                        timeIndicator.id = `${section}-last-update`;
+                        timeIndicator.style.color = '#666';
+                        timeIndicator.style.fontSize = '0.8rem';
+                        timeIndicator.style.marginLeft = '10px';
+                        header.querySelector('h2').appendChild(timeIndicator);
+                    }
+                }
+            }
+            
+            if (timeIndicator) {
+                timeIndicator.textContent = `(Actualizado: ${timeString})`;
+            }
+        }
+
+        // Actualizar las funciones de refresh para incluir el timestamp
+        async function refreshUsers(silent = false) {
+            if (!silent) {
+                console.log('🔄 Refrescando usuarios manualmente...');
+                showRefreshIndicator('users');
+            }
+            
+            try {
+                const oldCount = users.length;
+                await loadUsers();
+                lastDataUpdate.users = Date.now();
+                
+                if (!silent) {
+                    updateLastRefreshTime('users');
+                    const newCount = users.length;
+                    const message = newCount !== oldCount 
+                        ? `Usuarios actualizados (${newCount} total, ${newCount - oldCount > 0 ? '+' : ''}${newCount - oldCount} cambios)`
+                        : 'Usuarios actualizados (sin cambios)';
+                    showRefreshSuccess('users', message);
+                }
+            } catch (error) {
+                if (!silent) {
+                    showRefreshError('users', 'Error al actualizar usuarios');
+                }
+                console.error('Error refreshing users:', error);
+            }
+        }
+
+        async function refreshServices(silent = false) {
+            if (!silent) {
+                console.log('🔄 Refrescando servicios manualmente...');
+                showRefreshIndicator('services');
+            }
+            
+            try {
+                const oldCount = services.length;
+                await loadServices();
+                lastDataUpdate.services = Date.now();
+                
+                if (!silent) {
+                    updateLastRefreshTime('services');
+                    const newCount = services.length;
+                    const message = newCount !== oldCount 
+                        ? `Servicios actualizados (${newCount} total, ${newCount - oldCount > 0 ? '+' : ''}${newCount - oldCount} cambios)`
+                        : 'Servicios actualizados (sin cambios)';
+                    showRefreshSuccess('services', message);
+                }
+            } catch (error) {
+                if (!silent) {
+                    showRefreshError('services', 'Error al actualizar servicios');
+                }
+                console.error('Error refreshing services:', error);
+            }
+        }
+
+        async function refreshEvents(silent = false) {
+            if (!silent) {
+                console.log('🔄 Refrescando eventos manualmente...');
+                showRefreshIndicator('events');
+            }
+            
+            try {
+                const oldCount = events.length;
+                await loadEvents();
+                lastDataUpdate.events = Date.now();
+                
+                if (!silent) {
+                    updateLastRefreshTime('events');
+                    const newCount = events.length;
+                    const message = newCount !== oldCount 
+                        ? `Eventos actualizados (${newCount} total, ${newCount - oldCount > 0 ? '+' : ''}${newCount - oldCount} cambios)`
+                        : 'Eventos actualizados (sin cambios)';
+                    showRefreshSuccess('events', message);
+                }
+            } catch (error) {
+                if (!silent) {
+                    showRefreshError('events', 'Error al actualizar eventos');
+                }
+                console.error('Error refreshing events:', error);
+            }
+        }
+
+        // Funciones para mostrar indicadores de refresh
+        function showRefreshIndicator(section) {
+            const button = document.getElementById(`refresh-${section}-btn`);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-sync fa-spin"></i> Actualizando...';
+                button.disabled = true;
+            }
+        }
+
+        function showRefreshSuccess(section, message) {
+            const button = document.getElementById(`refresh-${section}-btn`);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-check"></i> Actualizado';
+                button.style.backgroundColor = '#4CAF50';
+                
+                // Restaurar después de 2 segundos
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar';
+                    button.style.backgroundColor = '';
+                    button.disabled = false;
+                }, 2000);
+            }
+            
+            // Mostrar mensaje temporal
+            console.log('✅', message);
+        }
+
+        function showRefreshError(section, message) {
+            const button = document.getElementById(`refresh-${section}-btn`);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                button.style.backgroundColor = '#f44336';
+                
+                // Restaurar después de 3 segundos
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar';
+                    button.style.backgroundColor = '';
+                    button.disabled = false;
+                }, 3000);
+            }
+            
+            console.error('❌', message);
         }
 
         async function loadUsers() {
@@ -1231,7 +1456,17 @@
             });
 
             // Activar el botón correspondiente
-            const activeBtn = document.querySelector(`.nav-btn.${sectionId.replace('-', '')}`) || 
+            const sectionMapping = {
+                'users-management': 'users',
+                'services-management': 'services', 
+                'events-management': 'events',
+                'main-dashboard': 'dashboard',
+                'reports': 'reports',
+                'system-tools': 'system-tools'
+            };
+            
+            const btnClass = sectionMapping[sectionId] || sectionId.replace('-', '');
+            const activeBtn = document.querySelector(`.nav-btn.${btnClass}`) || 
                              document.querySelector(`.nav-btn.dashboard`);
             if (activeBtn) {
                 activeBtn.classList.add('active');
@@ -2154,6 +2389,9 @@
                     clearInterval(roleCheckInterval);
                 }
                 
+                // Limpiar polling de datos
+                stopDataPolling();
+                
                 await ApiClient.post('/logout');
                 localStorage.removeItem('user');
                 localStorage.removeItem('auth_token');
@@ -2164,6 +2402,7 @@
                 if (roleCheckInterval) {
                     clearInterval(roleCheckInterval);
                 }
+                stopDataPolling();
                 localStorage.removeItem('user');
                 localStorage.removeItem('auth_token');
                 window.location.href = 'index.html';
