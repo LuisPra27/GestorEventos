@@ -1,5 +1,5 @@
 // Configuracion global de la API
-const API_BASE_URL = window.RAILWAY_CONFIG ? window.RAILWAY_CONFIG.getBackendUrl() : (() => {
+const API_BASE_URL = (() => {
     const hostname = window.location.hostname;
     
     // En desarrollo local
@@ -7,16 +7,17 @@ const API_BASE_URL = window.RAILWAY_CONFIG ? window.RAILWAY_CONFIG.getBackendUrl
         return 'http://localhost:8000/api';
     }
     
-    // En Railway - detectar automáticamente el backend
+    // En Railway - usar URL específica del backend
     if (hostname.includes('railway.app')) {
-        // Para Railway, intentar usar variables de entorno o construir URL
-        const backendDomain = hostname.replace(/^[^-]+-/, 'backend-');
-        return `https://${backendDomain}/api`;
+        return 'https://back-end-production-fca9.up.railway.app/api';
     }
     
     // Fallback para otros entornos
     return `${window.location.protocol}//${hostname}:8000/api`;
 })();
+
+// Debug: mostrar la URL que se está usando
+console.log('API_BASE_URL:', API_BASE_URL);
 
 // Funciones utilitarias para la API
 class ApiClient {
