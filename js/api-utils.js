@@ -8,12 +8,7 @@ const API_BASE_URL = (() => {
     }
     
     // En Railway - usar URL específica del backend
-    if (hostname.includes('railway.app')) {
-        return 'https://back-end-production-fca9.up.railway.app/api';
-    }
-    
-    // Fallback para otros entornos
-    return `${window.location.protocol}//${hostname}:8000/api`;
+    return 'https://back-end-production-fca9.up.railway.app/api';
 })();
 
 // Debug: mostrar la URL que se está usando

@@ -1,140 +1,172 @@
-# 🔐 Gestor de Eventos - Versión SSL
+# 🎪 Gestor de Eventos - Railway Deployment
 
-Sistema de gestión de eventos con certificado SSL habilitado por defecto.
+Sistema completo de gestión de eventos desplegado en Railway.
 
-## 🚀 Inicio Rápido
+## 🌐 Enlaces de Producción
+
+- **Frontend**: [Tu URL de Frontend en Railway]
+- **Backend API**: `https://back-end-production-fca9.up.railway.app/api`
+- **Estado del Sistema**: [Tu URL]/system-status.html
+
+## 🏗️ Arquitectura del Sistema
+
+### Servicios en Railway
+1. **PostgreSQL Database** - Base de datos principal
+2. **Laravel Backend** - API REST (Puerto dinámico de Railway)
+3. **Frontend** - Archivos estáticos servidos por Railway
+
+### Stack Tecnológico
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
+- **Backend**: Laravel 11 + Sanctum Authentication
+- **Base de Datos**: PostgreSQL 15
+- **Hosting**: Railway.app
+
+## 🚀 Funcionalidades del Sistema
+
+### Autenticación y Roles
+- ✅ Sistema de login/registro
+- ✅ 3 tipos de usuario: Cliente, Empleado, Gerente
+- ✅ Verificación automática de roles cada 10 segundos
+- ✅ Logout automático al cambiar roles
+- ✅ Detección inmediata de cambios de permisos
+
+### Dashboard Cliente
+- ✅ Crear nuevos eventos
+- ✅ Ver eventos propios
+- ✅ Seguimiento de estado de eventos
+- ✅ Estadísticas personales
+
+### Dashboard Empleado
+- ✅ Ver eventos asignados
+- ✅ Cambiar estado de eventos
+- ✅ Agregar seguimientos y comentarios
+- ✅ Filtros por estado (pendiente, en progreso, completado)
+
+### Dashboard Gerente
+- ✅ Gestión completa de usuarios
+- ✅ Gestión de servicios
+- ✅ Asignación de empleados a eventos
+- ✅ Reportes y estadísticas globales
+- ✅ Control de estados de cuentas
+
+## � Configuración de Desarrollo Local
 
 ### Prerrequisitos
-- Docker Desktop instalado
-- PowerShell (Windows) o Bash (Linux/Mac)
+- PHP 8.0+ con Composer
+- Node.js (opcional, para desarrollo frontend)
+- PostgreSQL local (opcional)
 
-### 1. Levantar la aplicación
+### Backend (Laravel)
 ```bash
-# Opción 1: Script automatizado (Windows)
-.\setup.ps1
-
-# Opción 2: Docker Compose manual
-docker-compose up --build -d
+cd LARAVEL
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-### 2. Acceder a la aplicación
-- **HTTPS (Recomendado):** https://localhost
-- **HTTP (redirige a HTTPS):** http://localhost
-- **API:** https://localhost/api/
-- **Estado del sistema:** https://localhost/status
-- **Ayuda SSL:** https://localhost/ssl-help
+### Frontend
+Servir archivos estáticos desde la raíz del proyecto en un servidor web.
 
-## 🛡️ Configuración SSL
+## 🚢 Deployment en Railway
 
-### Certificado Auto-firmado
-- El proyecto genera automáticamente un certificado SSL
-- **Primera vez:** El navegador mostrará una advertencia de seguridad
-- **Solución:** Hacer clic en "Avanzado" → "Continuar al sitio"
+### Variables de Entorno Requeridas
 
-### Puertos Configurados
-- **80 (HTTP):** Redirige automáticamente a HTTPS
-- **443 (HTTPS):** Conexión segura con SSL
-- **8000:** API Backend (Laravel)
-- **5432:** Base de datos PostgreSQL
+**Backend (LARAVEL/):**
+```env
+APP_NAME="Gestor de Eventos"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://back-end-production-fca9.up.railway.app
 
-## 📁 Estructura del Proyecto
+DB_CONNECTION=pgsql
+DB_HOST=${{ PGHOST }}
+DB_PORT=${{ PGPORT }}
+DB_DATABASE=${{ PGDATABASE }}
+DB_USERNAME=${{ PGUSER }}
+DB_PASSWORD=${{ PGPASSWORD }}
+
+SESSION_DRIVER=cookie
+SANCTUM_STATEFUL_DOMAINS=tu-frontend-domain.railway.app
+```
+
+### Estructura de Servicios Railway
+
+1. **PostgreSQL Database**
+   - Creado como add-on de Railway
+   - Variables automáticas: PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD
+
+2. **Backend Service**
+   - Root Directory: `LARAVEL`
+   - Build Command: Automático (Dockerfile)
+   - Start Command: Automático
+   - Puerto: `$PORT` (automático de Railway)
+
+3. **Frontend Service** 
+   - Root Directory: `/` (raíz del proyecto)
+   - Archivos estáticos: index.html, dashboard-*.html, css/, js/, images/
+
+## � Estructura del Proyecto
 
 ```
 GestorEventos/
-├── docker-compose.yml          # Configuración principal con SSL
-├── Dockerfile.frontend         # Contenedor frontend con SSL
-├── nginx.conf                  # Configuración Nginx con SSL
-├── setup.ps1                   # Script de configuración automatizada
-├── ssl-help.html              # Página de ayuda SSL
-├── css/                       # Estilos CSS
-├── js/                        # JavaScript
-├── images/                    # Imágenes
-├── LARAVEL/                   # Backend Laravel
-├── backup-scripts/            # Scripts de respaldo
-└── logs/                      # Logs del sistema
+├── README.md                   # Este archivo
+├── index.html                  # Página principal
+├── login.html                  # Página de login
+├── register.html               # Página de registro
+├── dashboard-cliente.html      # Panel cliente
+├── dashboard-empleado.html     # Panel empleado  
+├── dashboard-gerente.html      # Panel gerente
+├── system-status.html          # Estado del sistema
+├── railway.toml               # Configuración Railway
+├── css/
+│   └── style.css              # Estilos principales
+├── js/
+│   ├── api-utils.js          # Utilidades API
+│   └── script.js             # JavaScript principal
+├── images/                   # Recursos gráficos
+└── LARAVEL/                  # Backend Laravel
+    ├── Dockerfile           # Contenedor para Railway
+    ├── railway.toml         # Config Railway backend
+    ├── app/                 # Código Laravel
+    ├── database/            # Migraciones y seeders
+    └── ...                  # Resto de Laravel
 ```
 
-## 🔧 Comandos Útiles
+## 🔐 Seguridad
 
-### Gestión de Contenedores
-```bash
-# Iniciar servicios
-docker-compose up -d
+### Autenticación
+- Tokens Sanctum para API
+- Verificación continua de sesiones
+- Logout automático ante cambios de rol
+- Protección CSRF
 
-# Ver logs en tiempo real
-docker-compose logs -f
+### Roles y Permisos
+- **Cliente (rol_id: 1)**: Solo gestión de eventos propios
+- **Empleado (rol_id: 2)**: Eventos asignados + seguimientos
+- **Gerente (rol_id: 3)**: Acceso completo al sistema
 
-# Detener servicios
-docker-compose down
+## 🚨 Monitoreo y Estado
 
-# Reconstruir contenedores
-docker-compose up --build -d
+### Health Checks
+- `/api/health` - Estado general del backend
+- `/api/database/status` - Estado de la base de datos
+- `system-status.html` - Dashboard de monitoreo
 
-# Ver estado de contenedores
-docker-compose ps
-```
-
-### Desarrollo
-```bash
-# Acceder al contenedor frontend
-docker exec -it gestor_eventos_frontend_ssl sh
-
-# Acceder al contenedor backend
-docker exec -it gestor_eventos_backend_ssl bash
-
-# Ver logs específicos
-docker logs gestor_eventos_frontend_ssl
-docker logs gestor_eventos_backend_ssl
-```
-
-## 🌟 Características
-
-### SSL/TLS
-- ✅ Certificado SSL auto-firmado
-- ✅ Redirección automática HTTP → HTTPS
-- ✅ Headers de seguridad modernos
-- ✅ TLS 1.2/1.3 habilitado
-- ✅ HSTS, CSP, X-Frame-Options
-
-### Frontend
-- ✅ Nginx con configuración SSL optimizada
-- ✅ Servicio de archivos estáticos
-- ✅ Proxy reverso para API
-- ✅ Páginas de error personalizadas
-
-### Backend
-- ✅ Laravel 8.2 con PHP 8.0
-- ✅ API RESTful
-- ✅ Base de datos PostgreSQL
-- ✅ Sistema de respaldos automáticos
-
-## 🐛 Solución de Problemas
-
-### Error "Connection refused"
-```bash
-# Verificar que los contenedores estén corriendo
-docker-compose ps
-
-# Reiniciar servicios
-docker-compose restart
-```
-
-### Error "400 Bad Request"
-- **Causa:** Acceso incorrecto usando `localhost:443`
-- **Solución:** Usar `https://localhost` en su lugar
-
-### Certificado SSL no confiable
-- **Normal:** Es un certificado auto-firmado
-- **Solución:** Aceptar la advertencia del navegador
+### Logs
+- Logs de Railway disponibles en el dashboard
+- Seguimiento de errores en tiempo real
+- Métricas de performance automáticas
 
 ## 📞 Soporte
 
-Para problemas o preguntas:
-1. Revisar logs: `docker-compose logs -f`
-2. Verificar estado: `docker-compose ps`
-3. Acceder a la ayuda: https://localhost/ssl-help
+Para problemas técnicos:
+1. Verificar estado en `system-status.html`
+2. Revisar logs en Railway Dashboard
+3. Verificar variables de entorno
+4. Comprobar conectividad de base de datos
 
 ---
 
-**🔒 Versión SSL - Gestor de Eventos**  
-*Desarrollado con Docker, Nginx, Laravel y PostgreSQL*
+**� Desplegado en Railway | 🛡️ Seguro por defecto | ⚡ Escalable automáticamente**
