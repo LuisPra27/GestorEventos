@@ -1114,6 +1114,21 @@
             events: Date.now()
         };
 
+        // Función para manejar respuestas de API con verificación inmediata
+        function handleApiResponse(response) {
+            if (response.status === 401 || response.status === 403) {
+                console.log('🔒 Error de autorización detectado, verificando usuario inmediatamente');
+                setTimeout(() => checkCurrentUserRole(), 100); // Verificación inmediata
+                if (response.status === 401) {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+
         // Función para verificar si el rol del usuario actual ha cambiado
         async function checkCurrentUserRole() {
             console.log('🔍 Verificando rol del usuario en segundo plano...', currentUser);
@@ -1257,16 +1272,16 @@
             // Cargar datos iniciales
             loadAllData();
             
-            // Iniciar verificación periódica del rol (cada 30 segundos en segundo plano)
-            roleCheckInterval = setInterval(checkCurrentUserRole, 30000);
+            // Iniciar verificación periódica del rol (cada 10 segundos para detección más rápida)
+            roleCheckInterval = setInterval(checkCurrentUserRole, 10000);
             
             // Iniciar polling de datos (cada 30 segundos)
             startDataPolling();
             
-            // Verificación inicial después de 5 segundos
-            setTimeout(checkCurrentUserRole, 5000);
+            // Verificación inicial después de 3 segundos
+            setTimeout(checkCurrentUserRole, 3000);
             
-            console.log('🔄 Sistema de verificación de roles iniciado en segundo plano (cada 30 segundos)');
+            console.log('🔄 Sistema de verificación de roles iniciado en segundo plano (cada 10 segundos)');
             console.log('📊 Sistema de polling de datos iniciado (cada 30 segundos)');
         });
 
@@ -1492,6 +1507,9 @@
         async function loadUsers() {
             try {
                 const response = await fetch('https://back-end-production-fca9.up.railway.app/api/users', { headers: ApiClient.getHeaders() });
+                
+                if (!handleApiResponse(response)) return;
+                
                 const data = await response.json();
                 
                 if (data.success) {
@@ -1506,6 +1524,9 @@
         async function loadServices() {
             try {
                 const response = await fetch('https://back-end-production-fca9.up.railway.app/api/services', { headers: ApiClient.getHeaders() });
+                
+                if (!handleApiResponse(response)) return;
+                
                 const data = await response.json();
                 
                 if (data.success) {
@@ -1520,6 +1541,9 @@
         async function loadEvents() {
             try {
                 const response = await fetch('https://back-end-production-fca9.up.railway.app/api/events', { headers: ApiClient.getHeaders() });
+                
+                if (!handleApiResponse(response)) return;
+                
                 const data = await response.json();
                 
                 if (data.success) {
