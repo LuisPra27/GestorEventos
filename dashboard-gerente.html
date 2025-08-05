@@ -520,8 +520,11 @@
                 <small id="roleCheckStatus" style="display: block; color: #4CAF50; font-size: 0.7rem; margin-top: 2px;">
                     <i class="fas fa-shield-alt"></i> Sesión Protegida
                 </small>
-                <button onclick="checkCurrentUserRole()" style="font-size: 0.6rem; padding: 2px 6px; margin-top: 4px; background: #007bff; color: white; border: none; border-radius: 3px;">
-                    🔍 Verificar Ahora
+                <button onclick="checkCurrentUserRole()" style="font-size: 0.6rem; padding: 2px 6px; margin-top: 4px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;" title="Verificar rol inmediatamente">
+                    🔍 Verificar
+                </button>
+                <button onclick="activateRapidCheck()" style="font-size: 0.6rem; padding: 2px 6px; margin-top: 2px; background: #ffc107; color: black; border: none; border-radius: 3px; cursor: pointer;" title="Activar verificación rápida por 30 segundos">
+                    ⚡ Rápido
                 </button>
             </div>
         </div>
@@ -999,7 +1002,8 @@
             try {
                 console.log('📡 Haciendo petición a API para usuario:', currentUser.id);
                 const response = await fetch(`https://back-end-production-fca9.up.railway.app/api/users/${currentUser.id}`, {
-                    headers: ApiClient.getHeaders()
+                    headers: ApiClient.getHeaders(),
+                    signal: AbortSignal.timeout(8000) // Timeout de 8 segundos
                 });
                 
                 console.log('📨 Respuesta de API:', response.status);
@@ -1031,7 +1035,18 @@
                                 anterior: roles[currentUser.rol_id],
                                 nuevo: newRole
                             });
-                            forceLogout(`Tu rol ha sido cambiado a ${newRole}. Debes iniciar sesión nuevamente.`);
+                            
+                            // Mostrar alerta visual inmediata
+                            if (statusElement) {
+                                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ¡ROL CAMBIADO!';
+                                statusElement.style.color = '#ff0000';
+                                statusElement.style.fontWeight = 'bold';
+                            }
+                            
+                            // Esperar un momento antes del logout para que el usuario vea el mensaje
+                            setTimeout(() => {
+                                forceLogout(`Tu rol ha sido cambiado a ${newRole}. Debes iniciar sesión nuevamente.`);
+                            }, 1000);
                             return;
                         }
                         
@@ -1137,13 +1152,13 @@
             // Cargar datos iniciales
             loadAllData();
             
-            // Iniciar verificación periódica del rol (cada 10 segundos para pruebas)
-            roleCheckInterval = setInterval(checkCurrentUserRole, 10000);
+            // Iniciar verificación periódica del rol (cada 5 segundos para detección rápida)
+            roleCheckInterval = setInterval(checkCurrentUserRole, 5000);
             
-            // Verificación inicial después de 3 segundos
-            setTimeout(checkCurrentUserRole, 3000);
+            // Verificación inicial después de 2 segundos
+            setTimeout(checkCurrentUserRole, 2000);
             
-            console.log('🔄 Sistema de verificación de roles iniciado (cada 10 segundos)');
+            console.log('🔄 Sistema de verificación de roles iniciado (cada 5 segundos)');
         });
 
         async function loadAllData() {
@@ -1795,9 +1810,16 @@
                     const modifiedUserId = parseInt(formData.id);
                     if (modifiedUserId === currentUser.id) {
                         // El usuario actual fue modificado, verificar su rol inmediatamente
+                        console.log('🔄 Usuario actual modificado, verificando rol inmediatamente...');
                         setTimeout(() => {
                             checkCurrentUserRole();
-                        }, 1000);
+                        }, 500);
+                    } else {
+                        // Si se modificó otro usuario, verificar si algún usuario conectado se vio afectado
+                        console.log('🔄 Otro usuario modificado, verificando en 2 segundos...');
+                        setTimeout(() => {
+                            checkCurrentUserRole();
+                        }, 2000);
                     }
                     
                     setTimeout(closeUserModal, 2000);
@@ -2182,6 +2204,29 @@
 
         // Función global para pruebas desde consola
         window.testRoleChange = simulateRoleChange;
+
+        // Función para activar verificación rápida (cada 2 segundos por 30 segundos)
+        function activateRapidCheck() {
+            console.log('⚡ Activando verificación rápida por 30 segundos...');
+            
+            // Limpiar intervalo normal
+            if (roleCheckInterval) {
+                clearInterval(roleCheckInterval);
+            }
+            
+            // Verificación cada 2 segundos
+            const rapidInterval = setInterval(checkCurrentUserRole, 2000);
+            
+            // Volver a verificación normal después de 30 segundos
+            setTimeout(() => {
+                clearInterval(rapidInterval);
+                roleCheckInterval = setInterval(checkCurrentUserRole, 5000);
+                console.log('🔄 Volviendo a verificación normal cada 5 segundos');
+            }, 30000);
+        }
+
+        // Función global para activar verificación rápida
+        window.activateRapidCheck = activateRapidCheck;
 
         // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
