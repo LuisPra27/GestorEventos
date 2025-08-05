@@ -308,12 +308,12 @@
                 checkFrontendStatus(),
                 
                 // Backend API
-                checkService('backend', 'http://localhost:8000/api/health').then(() => {
+                checkService('backend', 'https://back-end-production-fca9.up.railway.app/api/health').then(() => {
                     document.getElementById('backend-card').classList.remove('checking');
                 }),
                 
                 // Base de datos (a través del backend)
-                fetch('http://localhost:8000/api/health', { method: 'GET' })
+                fetch('https://back-end-production-fca9.up.railway.app/api/health', { method: 'GET' })
                     .then(response => {
                         if (response.ok) {
                             return response.json();
@@ -344,3 +344,4 @@
     </script>
 </body>
 </html>
+
