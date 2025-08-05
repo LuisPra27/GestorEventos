@@ -477,13 +477,13 @@
         }
     </style>
     <script>
-        // Verificar autenticación al cargar la página
+        // Verificar autenticaciÃ³n al cargar la pÃ¡gina
         document.addEventListener('DOMContentLoaded', function() {
             if (!requireAuth()) return;
             
             const user = getCurrentUser();
             if (!user || user.rol_id !== 1) {
-                alert('Acceso denegado. Solo clientes pueden acceder a esta página.');
+                alert('Acceso denegado. Solo clientes pueden acceder a esta pÃ¡gina.');
                 window.location.href = 'login.html';
                 return;
             }
@@ -502,7 +502,7 @@
         <div class="logo-section">
             <h1><i class="fas fa-calendar-alt"></i> Eventos</h1>
             <div class="user-info">
-                <span>¡Hola <strong id="userName">Usuario</strong>!</span>
+                <span>Â¡Hola <strong id="userName">Usuario</strong>!</span>
             </div>
         </div>
         
@@ -527,7 +527,7 @@
         <div id="main-dashboard" class="content-section active">
             <div class="welcome-section">
                 <h1 class="welcome-title">Bienvenido a tu Dashboard</h1>
-                <p style="color: #666; font-size: 1.1rem;">Gestiona tus eventos de manera fácil y rápida</p>
+                <p style="color: #666; font-size: 1.1rem;">Gestiona tus eventos de manera fÃ¡cil y rÃ¡pida</p>
             </div>
 
             <div class="quick-stats">
@@ -549,7 +549,7 @@
                 </div>
             </div>
 
-            <h3 style="margin-bottom: 1rem; text-align: center; color: #333;">Próximos Eventos</h3>
+            <h3 style="margin-bottom: 1rem; text-align: center; color: #333;">PrÃ³ximos Eventos</h3>
             <div id="upcomingEvents" class="event-list"></div>
         </div>
 
@@ -564,39 +564,39 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="eventTitle">Nombre del Evento *</label>
-                        <input type="text" id="eventTitle" required placeholder="Ej: Fiesta de Cumpleaños">
+                        <input type="text" id="eventTitle" required placeholder="Ej: Fiesta de CumpleaÃ±os">
                     </div>
                     
                     <div class="form-group">
                         <label for="eventService">Tipo de Servicio *</label>
                         <select id="eventService" required>
-                            <option value="">¿Qué tipo de evento es?</option>
+                            <option value="">Â¿QuÃ© tipo de evento es?</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="eventDate">¿Cuándo será? *</label>
+                        <label for="eventDate">Â¿CuÃ¡ndo serÃ¡? *</label>
                         <input type="datetime-local" id="eventDate" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="eventGuests">¿Cuántas personas?</label>
-                        <input type="number" id="eventGuests" min="1" value="50" placeholder="Número de invitados">
+                        <label for="eventGuests">Â¿CuÃ¡ntas personas?</label>
+                        <input type="number" id="eventGuests" min="1" value="50" placeholder="NÃºmero de invitados">
                     </div>
                 </div>
                 
                 <div class="form-row full-width">
                     <div class="form-group">
-                        <label for="eventLocation">¿Dónde será? *</label>
-                        <input type="text" id="eventLocation" required placeholder="Dirección o lugar del evento">
+                        <label for="eventLocation">Â¿DÃ³nde serÃ¡? *</label>
+                        <input type="text" id="eventLocation" required placeholder="DirecciÃ³n o lugar del evento">
                     </div>
                 </div>
                 
                 <div class="form-row full-width">
                     <div class="form-group">
-                        <label for="eventDescription">Cuéntanos más sobre tu evento</label>
+                        <label for="eventDescription">CuÃ©ntanos mÃ¡s sobre tu evento</label>
                         <textarea id="eventDescription" rows="2" placeholder="Describe lo que tienes en mente..."></textarea>
                     </div>
                 </div>
@@ -604,7 +604,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="eventBudget">Presupuesto (opcional)</label>
-                        <input type="number" id="eventBudget" min="0" step="0.01" placeholder="¿Cuánto quieres invertir?">
+                        <input type="number" id="eventBudget" min="0" step="0.01" placeholder="Â¿CuÃ¡nto quieres invertir?">
                     </div>
                     
                     <div class="form-group">
@@ -634,7 +634,7 @@
         let services = [];
         let events = [];
 
-        // Verificar autenticación al cargar la página
+        // Verificar autenticaciÃ³n al cargar la pÃ¡gina
         document.addEventListener('DOMContentLoaded', function() {
             const userData = localStorage.getItem('user');
             if (!userData) {
@@ -646,12 +646,12 @@
             
             // Verificar que sea un cliente
             if (currentUser.rol_id !== 1) {
-                alert('Acceso denegado. Esta página es solo para clientes.');
+                alert('Acceso denegado. Esta pÃ¡gina es solo para clientes.');
                 window.location.href = 'login.html';
                 return;
             }
             
-            // Actualizar información del usuario en la UI
+            // Actualizar informaciÃ³n del usuario en la UI
             document.getElementById('userName').textContent = currentUser.nombre;
             if (document.getElementById('userEmail')) {
                 document.getElementById('userEmail').textContent = currentUser.email;
@@ -668,7 +668,7 @@
                 section.classList.remove('active');
             });
             
-            // Mostrar la sección seleccionada
+            // Mostrar la secciÃ³n seleccionada
             document.getElementById(sectionId).classList.add('active');
             
             // Actualizar navbar activo
@@ -676,18 +676,18 @@
                 btn.classList.remove('active');
             });
             
-            // Activar el botón correspondiente
+            // Activar el botÃ³n correspondiente
             const activeBtn = document.querySelector(`.nav-btn.${sectionId.replace('-', '')}`) || 
                              document.querySelector(`.nav-btn.dashboard`);
             if (activeBtn) {
                 activeBtn.classList.add('active');
             }
             
-            // Cargar datos específicos de la sección
+            // Cargar datos especÃ­ficos de la secciÃ³n
             if (sectionId === 'my-events') {
                 loadEvents();
             } else if (sectionId === 'new-event') {
-                // Asegurar que los servicios estén cargados cuando se abre el formulario
+                // Asegurar que los servicios estÃ©n cargados cuando se abre el formulario
                 console.log('Switching to new-event section, current services:', services.length);
                 if (services.length === 0) {
                     console.log('Services not loaded, loading now...');
@@ -697,12 +697,12 @@
                     populateServiceSelect();
                 }
             } else if (sectionId === 'main-dashboard') {
-                // Asegurar que los eventos estén cargados para mostrar estadísticas
+                // Asegurar que los eventos estÃ©n cargados para mostrar estadÃ­sticas
                 if (events.length === 0) {
                     console.log('Events not loaded for dashboard, loading now...');
                     loadEvents();
                 } else {
-                    // Actualizar las estadísticas y eventos próximos
+                    // Actualizar las estadÃ­sticas y eventos prÃ³ximos
                     updateDashboardStats();
                     displayUpcomingEvents();
                 }
@@ -717,7 +717,7 @@
                 });
                 console.log('Services API response status:', response.status);
                 
-                // Si no está autorizado, redirigir al login
+                // Si no estÃ¡ autorizado, redirigir al login
                 if (response.status === 401) {
                     console.log('Token expired or invalid, redirecting to login');
                     localStorage.removeItem('auth_token');
@@ -738,10 +738,10 @@
                     // Datos de respaldo en caso de que el API no funcione
                     services = [
                         { id: 1, nombre: 'Boda Completa', precio: 2500, descripcion: 'Servicio completo de bodas' },
-                        { id: 2, nombre: 'Fiesta de Cumpleaños', precio: 800, descripcion: 'Organización de fiestas de cumpleaños' },
+                        { id: 2, nombre: 'Fiesta de CumpleaÃ±os', precio: 800, descripcion: 'OrganizaciÃ³n de fiestas de cumpleaÃ±os' },
                         { id: 3, nombre: 'Evento Corporativo', precio: 1200, descripcion: 'Eventos empresariales y corporativos' },
-                        { id: 4, nombre: 'Quinceañera', precio: 1800, descripcion: 'Celebración de quinceañeras' },
-                        { id: 5, nombre: 'Baby Shower', precio: 600, descripcion: 'Celebración de baby shower' }
+                        { id: 4, nombre: 'QuinceaÃ±era', precio: 1800, descripcion: 'CelebraciÃ³n de quinceaÃ±eras' },
+                        { id: 5, nombre: 'Baby Shower', precio: 600, descripcion: 'CelebraciÃ³n de baby shower' }
                     ];
                     populateServiceSelect();
                 }
@@ -751,10 +751,10 @@
                 // Datos de respaldo en caso de error
                 services = [
                     { id: 1, nombre: 'Boda Completa', precio: 2500, descripcion: 'Servicio completo de bodas' },
-                    { id: 2, nombre: 'Fiesta de Cumpleaños', precio: 800, descripcion: 'Organización de fiestas de cumpleaños' },
+                    { id: 2, nombre: 'Fiesta de CumpleaÃ±os', precio: 800, descripcion: 'OrganizaciÃ³n de fiestas de cumpleaÃ±os' },
                     { id: 3, nombre: 'Evento Corporativo', precio: 1200, descripcion: 'Eventos empresariales y corporativos' },
-                    { id: 4, nombre: 'Quinceañera', precio: 1800, descripcion: 'Celebración de quinceañeras' },
-                    { id: 5, nombre: 'Baby Shower', precio: 600, descripcion: 'Celebración de baby shower' }
+                    { id: 4, nombre: 'QuinceaÃ±era', precio: 1800, descripcion: 'CelebraciÃ³n de quinceaÃ±eras' },
+                    { id: 5, nombre: 'Baby Shower', precio: 600, descripcion: 'CelebraciÃ³n de baby shower' }
                 ];
                 populateServiceSelect();
             }
@@ -796,7 +796,7 @@
                     headers: ApiClient.getHeaders() 
                 });
                 
-                // Si no está autorizado, redirigir al login
+                // Si no estÃ¡ autorizado, redirigir al login
                 if (response.status === 401) {
                     console.log('Token expired or invalid, redirecting to login');
                     localStorage.removeItem('auth_token');
@@ -817,7 +817,7 @@
                     displayUpcomingEvents();
                 } else {
                     console.error('Error loading events:', data.error);
-                    // Inicializar arrays vacíos si hay error
+                    // Inicializar arrays vacÃ­os si hay error
                     events = [];
                     updateDashboardStats();
                     displayEvents();
@@ -825,7 +825,7 @@
                 }
             } catch (error) {
                 console.error('Error loading events:', error);
-                // Inicializar arrays vacíos si hay error
+                // Inicializar arrays vacÃ­os si hay error
                 events = [];
                 updateDashboardStats();
                 displayEvents();
@@ -850,7 +850,7 @@
             container.innerHTML = '';
             
             if (events.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #666;"><i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i><p>No tienes eventos registrados aún.</p><p>¡Crea tu primer evento!</p></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #666;"><i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i><p>No tienes eventos registrados aÃºn.</p><p>Â¡Crea tu primer evento!</p></div>';
                 return;
             }
             
@@ -871,7 +871,7 @@
                 .slice(0, 3);
             
             if (upcomingEvents.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666; background: #f8f9fa; border-radius: 10px;"><i class="fas fa-calendar-plus" style="font-size: 2rem; margin-bottom: 1rem; display: block; color: #667eea;"></i><p>No tienes eventos próximos.</p><p><a href="#" onclick="showSection(\'new-event\')" style="color: #667eea; text-decoration: none;">¿Quieres crear uno?</a></p></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666; background: #f8f9fa; border-radius: 10px;"><i class="fas fa-calendar-plus" style="font-size: 2rem; margin-bottom: 1rem; display: block; color: #667eea;"></i><p>No tienes eventos prÃ³ximos.</p><p><a href="#" onclick="showSection(\'new-event\')" style="color: #667eea; text-decoration: none;">Â¿Quieres crear uno?</a></p></div>';
                 return;
             }
             
@@ -919,7 +919,7 @@
                 </div>
                 <p class="event-date" style="margin-bottom: 0.5rem;">${formattedDate}</p>
                 <p style="margin-bottom: 0.5rem;"><strong>Servicio:</strong> ${event.servicio_nombre}</p>
-                <p style="margin-bottom: 0.5rem;"><strong>Ubicación:</strong> ${event.ubicacion}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>UbicaciÃ³n:</strong> ${event.ubicacion}</p>
                 <p style="margin-bottom: 0.5rem;"><strong>Invitados:</strong> ${event.numero_invitados} personas</p>
                 ${event.empleado_nombre ? `<p style="margin-bottom: 0.5rem;"><strong>Empleado asignado:</strong> ${event.empleado_nombre}</p>` : ''}
                 ${event.descripcion ? `<p style="color: #666; font-style: italic;">${event.descripcion}</p>` : ''}
@@ -957,7 +957,7 @@
                     body: JSON.stringify(formData)
                 });
                 
-                // Si no está autorizado, redirigir al login
+                // Si no estÃ¡ autorizado, redirigir al login
                 if (response.status === 401) {
                     console.log('Token expired or invalid, redirecting to login');
                     localStorage.removeItem('auth_token');
@@ -978,7 +978,7 @@
                     // Recargar eventos
                     loadEvents();
                     
-                    // Cambiar a la sección de eventos
+                    // Cambiar a la secciÃ³n de eventos
                     setTimeout(() => {
                         showSection('my-events');
                     }, 2000);
@@ -997,11 +997,11 @@
                 localStorage.removeItem('user');
                 window.location.href = 'index.html';
             } catch (error) {
-                console.error('Error al cerrar sesión:', error);
+                console.error('Error al cerrar sesiÃ³n:', error);
             }
         }
 
-        // Configurar fecha mínima para el evento (hoy)
+        // Configurar fecha mÃ­nima para el evento (hoy)
         const today = new Date();
         today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
         document.getElementById('eventDate').min = today.toISOString().slice(0, 16);

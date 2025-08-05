@@ -1,16 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;700&display=swap');
 
 :root{
     --main-color:#3867d6;
 }
 
 *{
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Poppins', sans-serif;
     margin:0; padding:0;
     box-sizing: border-box;
     outline: none; border:none;
     text-decoration: none;
-    text-transform: capitalize;
+    text-transform: none;
     transition: .2s linear;
 }
 
@@ -509,7 +509,7 @@ section{
 .contact form .inputBox input::placeholder,
 .contact form textarea::placeholder{
     color:#eee;
-    text-transform: capitalize;
+    text-transform: none;
 }
 
 .contact form .inputBox input:focus,
