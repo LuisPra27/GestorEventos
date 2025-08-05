@@ -14,7 +14,8 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem 0;
+            padding: 2rem 1rem;
+            overflow-y: auto;
         }
         .login-form {
             background: white;
@@ -105,6 +106,49 @@
             text-align: center;
             color: #667eea;
         }
+        
+        .test-accounts {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 1rem;
+                min-height: 100vh;
+                align-items: flex-start;
+            }
+            
+            .login-form {
+                margin: 1rem 0;
+                padding: 2rem 1.5rem;
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .login-form h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+            
+            .btn-login {
+                padding: 1.2rem;
+                font-size: 1rem;
+            }
+            
+            .test-accounts {
+                font-size: 0.8rem;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -136,7 +180,7 @@
                 <br><br>
                 <a href="index.html"> Volver al inicio</a>
             </div>
-            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee; font-size: 0.9rem; color: #666;">
+            <div class="test-accounts">
                 <strong>Cuentas de prueba:</strong><br>
                 <strong>Gerente:</strong> admin@gestor.com / admin123<br>
                 <strong>Empleado:</strong> empleado@gestor.com / empleado123

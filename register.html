@@ -4,17 +4,7 @@
     <script src="js/api-utils.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regist                 <div class="links">
-                <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
-                <br><br>
-                <a href="index.html">← Volver al inicio</a>
-            </div>   <div class="links">
-                <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
-                <br><br>
-                <a href="index.html">← Volver al inicio</a>
-            </div>          <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
-                <br><br>
-                <a href="index.html">← Volver al inicio</a>- Gestor de Eventos</title>
+    <title>Registrarse - Gestor de Eventos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -24,7 +14,8 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem 0;
+            padding: 2rem 1rem;
+            overflow-y: auto;
         }
 
         .register-form {
@@ -152,6 +143,33 @@
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
+            }
+            
+            .register-container {
+                padding: 1rem;
+                min-height: 100vh;
+                align-items: flex-start;
+            }
+            
+            .register-form {
+                margin: 1rem 0;
+                padding: 2rem 1.5rem;
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .register-form h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+            
+            .btn-register {
+                padding: 1.2rem;
+                font-size: 1rem;
             }
         }
     </style>
