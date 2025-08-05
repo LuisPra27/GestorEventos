@@ -1,4 +1,4 @@
-# Railway Dockerfile para Frontend
+# Railway Dockerfile para Frontend - Versión Simplificada
 FROM nginx:alpine
 
 # Instalar curl para health checks
@@ -13,24 +13,34 @@ COPY css/ /usr/share/nginx/html/css/
 COPY js/ /usr/share/nginx/html/js/
 COPY images/ /usr/share/nginx/html/images/
 
-# Copiar configuración de Nginx para Railway
-COPY nginx-railway.conf /etc/nginx/conf.d/default.conf
+# Crear configuración simple de nginx directamente
+RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
+    echo '    listen 80;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    server_name _;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location /health {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        return 200 "healthy";' >> /etc/nginx/conf.d/default.conf && \
+    echo '        add_header Content-Type text/plain;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '}' >> /etc/nginx/conf.d/default.conf
 
-# Crear páginas de error
-RUN echo '<!DOCTYPE html><html><head><title>404 - Página no encontrada</title><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;text-align:center;margin-top:50px}</style></head><body><h1>404 - Página no encontrada</h1><p>La página que buscas no existe.</p><a href="/">Volver al inicio</a></body></html>' > /usr/share/nginx/html/404.html
-
-RUN echo '<!DOCTYPE html><html><head><title>Error del servidor</title><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;text-align:center;margin-top:50px}</style></head><body><h1>Error del servidor</h1><p>El servidor encontró un error temporal.</p><a href="/">Volver al inicio</a></body></html>' > /usr/share/nginx/html/50x.html
+# Verificar configuración de nginx
+RUN nginx -t
 
 # Configurar permisos
 RUN chown -R nginx:nginx /usr/share/nginx/html \
     && chmod -R 755 /usr/share/nginx/html
 
-# Exponer puerto para Railway
+# Exponer puerto
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+# Health check simple
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
 
 # Comando de inicio
 CMD ["nginx", "-g", "daemon off;"]
