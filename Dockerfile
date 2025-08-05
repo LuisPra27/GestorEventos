@@ -23,10 +23,17 @@ RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
     echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
     echo '    }' >> /etc/nginx/conf.d/default.conf && \
     echo '    location /health {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        return 200 "healthy";' >> /etc/nginx/conf.d/default.conf && \
+    echo '        return 200 "healthy\\n";' >> /etc/nginx/conf.d/default.conf && \
     echo '        add_header Content-Type text/plain;' >> /etc/nginx/conf.d/default.conf && \
     echo '    }' >> /etc/nginx/conf.d/default.conf && \
     echo '}' >> /etc/nginx/conf.d/default.conf
+
+# Crear script de inicio que maneje el puerto de Railway
+RUN echo '#!/bin/sh' > /start.sh && \
+    echo 'PORT=${PORT:-80}' >> /start.sh && \
+    echo 'sed -i "s/listen 80;/listen $PORT;/" /etc/nginx/conf.d/default.conf' >> /start.sh && \
+    echo 'exec nginx -g "daemon off;"' >> /start.sh && \
+    chmod +x /start.sh
 
 # Verificar configuración de nginx
 RUN nginx -t
@@ -38,9 +45,5 @@ RUN chown -R nginx:nginx /usr/share/nginx/html \
 # Exponer puerto
 EXPOSE 80
 
-# Health check simple
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
-
 # Comando de inicio
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/start.sh"]
