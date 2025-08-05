@@ -463,6 +463,32 @@
                 min-height: calc(100vh - 200px);
             }
         }
+
+        /* Estilos para iconos del sistema */
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .stat-icon.system {
+            color: #28a745;
+        }
+
+        .stat-icon.testing {
+            color: #17a2b8;
+        }
+
+        .stat-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-content p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
     </style>
     <script>
         // Verificar autenticación al cargar la página
@@ -509,6 +535,9 @@
             </button>
             <button class="nav-btn reports" onclick="showSection('reports')">
                 <i class="fas fa-chart-bar"></i> Reportes
+            </button>
+            <button class="nav-btn system-tools" onclick="showSection('system-tools')">
+                <i class="fas fa-tools"></i> Sistema
             </button>
             <button class="logout-btn-nav" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Salir
@@ -686,6 +715,45 @@
                 <div class="chart-container">
                     <h4>Tendencia Mensual</h4>
                     <div id="monthlyTrend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Tools Section -->
+        <div id="system-tools" class="content-section">
+            <div class="section-header">
+                <h2>Herramientas del Sistema</h2>
+                <p style="color: #666; margin-top: 0.5rem;">Monitoreo y diagnóstico del sistema</p>
+            </div>
+            
+            <div class="action-buttons" style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem;">
+                <button class="btn btn-info" onclick="openSystemStatus()">
+                    <i class="fas fa-heartbeat"></i> Estado del Sistema
+                </button>
+                <button class="btn btn-secondary" onclick="openTestServices()">
+                    <i class="fas fa-vial"></i> Test de Servicios
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon system">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Monitoreo</h3>
+                        <p>Verificar el estado de todos los servicios del sistema en tiempo real</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon testing">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Pruebas API</h3>
+                        <p>Ejecutar pruebas de conectividad y funcionalidad de la API</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1834,6 +1902,15 @@
             } catch (error) {
                 console.error('Error al cerrar sesión:', error);
             }
+        }
+
+        // Funciones para herramientas del sistema
+        function openSystemStatus() {
+            window.open('system-status.html', '_blank');
+        }
+
+        function openTestServices() {
+            window.open('test-services.html', '_blank');
         }
 
         // Cerrar modales al hacer clic fuera
