@@ -62,20 +62,41 @@ fi
 
 # Ejecutar migraciones solo si la base de datos está disponible
 if [ ! -z "$PGHOST" ]; then
-    echo "📦 Ejecutando migraciones de base de datos..."
+    echo "📦 Iniciando configuración de base de datos..."
 
-    # Intentar conectar a la base de datos
-    until php artisan migrate --force 2>/dev/null; do
-        echo "⏳ Esperando que la base de datos esté lista..."
-        sleep 5
+    # Esperar a que la base de datos esté disponible
+    echo "⏳ Esperando conexión a la base de datos..."
+    timeout_counter=0
+    until timeout 15 php artisan tinker --execute="DB::connection()->getPdo(); echo 'OK';" 2>/dev/null | grep -q "OK"; do
+        echo "⏳ Base de datos no disponible, esperando 10 segundos... (intento $((++timeout_counter)))"
+        if [ $timeout_counter -ge 6 ]; then  # 60 segundos total
+            echo "❌ Timeout: No se pudo conectar a la base de datos después de 60 segundos"
+            exit 1
+        fi
+        sleep 10
     done
 
-    echo "✅ Migraciones completadas"
+    echo "✅ Conexión a base de datos establecida"
 
-    # Ejecutar seeders solo en primera instalación
-    if php artisan migrate:status | grep -q "No migrations found"; then
-        echo "🌱 Ejecutando seeders iniciales..."
-        php artisan db:seed --force || echo "⚠️  Seeders no ejecutados (puede ser normal)"
+    # Usar nuestro comando de migración segura
+    echo "🔧 Ejecutando migraciones seguras..."
+    if php artisan migrate:safe --force; then
+        echo "✅ Migraciones completadas exitosamente"
+    else
+        echo "⚠️  Problemas con migraciones, intentando método tradicional..."
+
+        # Verificar si hay datos existentes antes de migrar
+        echo "🔍 Verificando si hay datos existentes..."
+        USER_COUNT=$(php artisan tinker --execute="echo DB::table('users')->count();" 2>/dev/null | grep -E '^[0-9]+$' | head -1)
+
+        if [ "$USER_COUNT" -gt 0 ] 2>/dev/null; then
+            echo "📊 Datos existentes detectados ($USER_COUNT usuarios), solo aplicando migraciones pendientes..."
+            php artisan migrate --force
+        else
+            echo "🆕 Base de datos vacía, ejecutando instalación completa..."
+            php artisan migrate --force
+            php artisan db:seed --force
+        fi
     fi
 else
     echo "⚠️  Saltando migraciones - Base de datos no configurada"
