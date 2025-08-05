@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
+
+[environments.production]
+variables.APP_ENV = "production"
+variables.APP_DEBUG = "false"
+variables.APP_NAME = "Gestor de Eventos"
+variables.APP_URL = "https://${{ RAILWAY_PUBLIC_DOMAIN }}"
+
+[environments.staging]
+variables.APP_ENV = "staging"
+variables.APP_DEBUG = "true"

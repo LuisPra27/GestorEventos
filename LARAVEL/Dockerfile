@@ -1,6 +1,5 @@
-# BACKEND
-#Usar PHP 8.2 con FPM
-FROM php:8.2-fpm
+# Railway Backend - Laravel
+FROM php:8.2-cli
 
 # Establecer el directorio de trabajo
 WORKDIR /var/www/html
@@ -16,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpq-dev \
     libzip-dev \
+    nginx \
+    supervisor \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,13 +33,74 @@ COPY . .
 # Instalar dependencias PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Crear archivo .env por defecto para Railway
+RUN echo 'APP_NAME="Gestor de Eventos"' > .env && \
+    echo 'APP_ENV=production' >> .env && \
+    echo 'APP_KEY=' >> .env && \
+    echo 'APP_DEBUG=false' >> .env && \
+    echo 'APP_TIMEZONE=America/Guayaquil' >> .env && \
+    echo 'APP_URL=http://localhost' >> .env && \
+    echo '' >> .env && \
+    echo 'DB_CONNECTION=pgsql' >> .env && \
+    echo 'DB_HOST=${PGHOST}' >> .env && \
+    echo 'DB_PORT=${PGPORT}' >> .env && \
+    echo 'DB_DATABASE=${PGDATABASE}' >> .env && \
+    echo 'DB_USERNAME=${PGUSER}' >> .env && \
+    echo 'DB_PASSWORD=${PGPASSWORD}' >> .env && \
+    echo '' >> .env && \
+    echo 'BROADCAST_DRIVER=log' >> .env && \
+    echo 'CACHE_DRIVER=file' >> .env && \
+    echo 'FILESYSTEM_DISK=local' >> .env && \
+    echo 'QUEUE_CONNECTION=sync' >> .env && \
+    echo 'SESSION_DRIVER=file' >> .env && \
+    echo 'SESSION_LIFETIME=120' >> .env
+
+# Generar clave de aplicación
+RUN php artisan key:generate --force
+
 # Configurar permisos
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Exponer puerto
+# Crear script de inicio para Railway
+RUN echo '#!/bin/bash' > /start.sh && \
+    echo 'set -e' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Actualizar variables de entorno desde Railway' >> /start.sh && \
+    echo 'if [ ! -z "$PGHOST" ]; then' >> /start.sh && \
+    echo '    echo "Configurando base de datos PostgreSQL..."' >> /start.sh && \
+    echo '    sed -i "s/DB_HOST=.*/DB_HOST=${PGHOST}/" .env' >> /start.sh && \
+    echo '    sed -i "s/DB_PORT=.*/DB_PORT=${PGPORT}/" .env' >> /start.sh && \
+    echo '    sed -i "s/DB_DATABASE=.*/DB_DATABASE=${PGDATABASE}/" .env' >> /start.sh && \
+    echo '    sed -i "s/DB_USERNAME=.*/DB_USERNAME=${PGUSER}/" .env' >> /start.sh && \
+    echo '    sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${PGPASSWORD}/" .env' >> /start.sh && \
+    echo 'fi' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo 'if [ ! -z "$RAILWAY_PUBLIC_DOMAIN" ]; then' >> /start.sh && \
+    echo '    sed -i "s|APP_URL=.*|APP_URL=https://${RAILWAY_PUBLIC_DOMAIN}|" .env' >> /start.sh && \
+    echo 'fi' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Ejecutar migraciones' >> /start.sh && \
+    echo 'echo "Ejecutando migraciones..."' >> /start.sh && \
+    echo 'php artisan migrate --force' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Limpiar cache' >> /start.sh && \
+    echo 'php artisan config:cache' >> /start.sh && \
+    echo 'php artisan route:cache' >> /start.sh && \
+    echo 'php artisan view:cache' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Iniciar servidor' >> /start.sh && \
+    echo 'echo "Iniciando servidor en puerto ${PORT:-8000}..."' >> /start.sh && \
+    echo 'php artisan serve --host=0.0.0.0 --port=${PORT:-8000}' >> /start.sh && \
+    chmod +x /start.sh
+
+# Exponer puerto para Railway
 EXPOSE 8000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8000}/api/health || exit 1
+
 # Comando de inicio
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["/start.sh"]

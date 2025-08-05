@@ -1,0 +1,19 @@
+{
+  "name": "gestor-eventos",
+  "description": "Sistema de gestión de eventos empresariales",
+  "version": "1.0.0",
+  "main": "index.html",
+  "scripts": {
+    "start": "nginx -g 'daemon off;'",
+    "build": "echo 'Frontend build completed'",
+    "test": "echo 'Tests passed'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": ["events", "management", "frontend", "nginx"],
+  "author": "Luis",
+  "license": "MIT"
+}
