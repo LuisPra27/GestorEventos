@@ -775,8 +775,8 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="userName">Nombre *</label>
-                        <input type="text" id="userName" required>
+                        <label for="userFormName">Nombre *</label>
+                        <input type="text" id="userFormName" required>
                     </div>
                     
                     <div class="form-group">
@@ -1405,7 +1405,7 @@
                 const user = users.find(u => u.id === userId);
                 if (user) {
                     document.getElementById('userId').value = user.id;
-                    document.getElementById('userName').value = user.nombre;
+                    document.getElementById('userFormName').value = user.nombre;
                     document.getElementById('userEmail').value = user.email;
                     document.getElementById('userRole').value = user.rol_id;
                     document.getElementById('userPhone').value = user.telefono || '';
@@ -1552,22 +1552,54 @@
             
             const formData = {
                 id: document.getElementById('userId').value,
-                nombre: document.getElementById('userName').value,
-                email: document.getElementById('userEmail').value,
-                rol_id: document.getElementById('userRole').value,
-                telefono: document.getElementById('userPhone').value,
-                password: document.getElementById('userPassword').value,
+                nombre: document.getElementById('userFormName').value.trim(),
+                email: document.getElementById('userEmail').value.trim(),
+                rol_id: parseInt(document.getElementById('userRole').value),
+                telefono: document.getElementById('userPhone').value.trim(),
                 activo: document.getElementById('userStatus').value === 'activo'
             };
+            
+            // Validaciones básicas
+            if (!formData.nombre || !formData.email || !formData.rol_id) {
+                errorAlert.textContent = 'Por favor complete todos los campos obligatorios';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            if (![1, 2, 3].includes(formData.rol_id)) {
+                errorAlert.textContent = 'Rol inválido seleccionado';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // Solo incluir password si se está creando un nuevo usuario o si se especificó una nueva contraseña
+            const passwordField = document.getElementById('userPassword').value;
+            if (!formData.id || passwordField.trim()) {
+                if (!passwordField.trim() && !formData.id) {
+                    errorAlert.textContent = 'La contraseña es obligatoria para nuevos usuarios';
+                    errorAlert.style.display = 'block';
+                    return;
+                }
+                formData.password = passwordField.trim();
+            }
             
             try {
                 const method = formData.id ? 'PUT' : 'POST';
                 const url = formData.id ? `https://back-end-production-fca9.up.railway.app/api/users/${formData.id}` : 'https://back-end-production-fca9.up.railway.app/api/users';
+                
+                console.log('User form submission:', {
+                    method,
+                    url,
+                    data: formData
+                });
+                
                 const response = await fetch(url, {
                     method: method,
                     headers: ApiClient.getHeaders(),
                     body: JSON.stringify(formData)
                 });
+                
+                console.log('Response status:', response.status);
                 
                 if (response.status === 401) {
                     localStorage.removeItem('auth_token');
@@ -1577,7 +1609,22 @@
                 }
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    // Intentar obtener el mensaje de error del servidor
+                    let errorMessage;
+                    try {
+                        const errorData = await response.json();
+                        console.error('Server error details:', errorData);
+                        errorMessage = errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`;
+                        
+                        // Mostrar errores específicos de validación
+                        if (errorData.errors && typeof errorData.errors === 'object') {
+                            const validationErrors = Object.values(errorData.errors).flat();
+                            errorMessage = validationErrors.join(', ');
+                        }
+                    } catch {
+                        errorMessage = `Error ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
                 }
                 
                 const data = await response.json();
@@ -1588,7 +1635,24 @@
                     loadUsers();
                     setTimeout(closeUserModal, 2000);
                 } else {
-                    throw new Error(data.error || 'Error al guardar usuario');
+                    let errorMessage = data.error || 'Error al guardar usuario';
+                    
+                    // Mostrar errores específicos de validación si los hay
+                    if (data.errors && typeof data.errors === 'object') {
+                        const validationErrors = [];
+                        Object.entries(data.errors).forEach(([field, messages]) => {
+                            if (Array.isArray(messages)) {
+                                validationErrors.push(...messages);
+                            } else {
+                                validationErrors.push(messages);
+                            }
+                        });
+                        if (validationErrors.length > 0) {
+                            errorMessage = validationErrors.join(', ');
+                        }
+                    }
+                    
+                    throw new Error(errorMessage);
                 }
             } catch (error) {
                 errorAlert.textContent = error.message;
