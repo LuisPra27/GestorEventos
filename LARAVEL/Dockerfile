@@ -97,7 +97,8 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo '' >> /start.sh && \
     echo '    # Ejecutar migraciones' >> /start.sh && \
     echo '    echo "📦 Ejecutando migraciones..."' >> /start.sh && \
-    echo '    php artisan migrate --force || echo "⚠️ Error en migraciones"' >> /start.sh && \
+    echo '    php artisan migrate:fresh --force || echo "⚠️ Error en migraciones"' >> /start.sh && \
+    echo '    php artisan db:seed --force || echo "⚠️ Error en seeders"' >> /start.sh && \
     echo 'else' >> /start.sh && \
     echo '    echo "⚠️ Variables PostgreSQL no encontradas"' >> /start.sh && \
     echo 'fi' >> /start.sh && \
