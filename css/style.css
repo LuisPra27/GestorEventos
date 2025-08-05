@@ -149,6 +149,11 @@ section{
     color:#fff;
     cursor: pointer;
     display: none;
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1001;
 }
 
 .mobile-auth-buttons{
@@ -644,7 +649,9 @@ section{
     }
 
     .header{
-        padding:1.5rem 2rem;
+        padding:1rem 2rem;
+        position: relative;
+        overflow: visible;
     }
 
     section{
@@ -657,6 +664,18 @@ section{
 
     #menu-bars{
         display: initial;
+        position: fixed;
+        right: 2rem;
+        top: 2rem;
+        z-index: 1002;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+    }
+
+    .header{
+        padding: 1rem 2rem;
+        position: relative;
     }
 
     .header .auth-buttons{
@@ -664,12 +683,17 @@ section{
     }
 
     .header .navbar{
-        position: absolute;
-        top:100%; left:0; right:0;
+        position: fixed;
+        top: 0; 
+        left: 0; 
+        right: 0;
+        height: 100vh;
         border-top: .1rem solid #222;
         background: #333;
         clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
-        padding-bottom: 1rem;
+        padding: 8rem 2rem 2rem 2rem;
+        z-index: 1001;
+        overflow-y: auto;
     }
 
     .header .navbar.active{
@@ -680,8 +704,8 @@ section{
         display: flex !important;
         flex-direction: column;
         gap: 1rem;
-        margin: 1.3rem;
-        padding-top: 1rem;
+        margin: 2rem 0;
+        padding-top: 2rem;
         border-top: 1px solid #444;
     }
 
@@ -729,13 +753,20 @@ section{
         display: flex;
         background:#222;
         border-radius: .5rem;
-        padding:1.3rem;
-        margin:1.3rem;
+        padding:1.5rem;
+        margin:1rem 0;
         font-size: 2rem;
+        color: #fff;
+        text-align: center;
+        justify-content: center;
     }
 
     .home .content h3{
         font-size: 4rem;
+    }
+
+    body {
+        overflow-x: hidden;
     }
 
 }
