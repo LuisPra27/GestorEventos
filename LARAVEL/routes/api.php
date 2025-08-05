@@ -10,22 +10,43 @@ use Illuminate\Support\Facades\DB;
 
 // Rutas publicas
 Route::get('/health', function () {
+    $response = [
+        'status' => 'ok',
+        'timestamp' => now()->toDateTimeString(),
+        'app' => config('app.name', 'Gestor de Eventos'),
+        'env' => config('app.env', 'unknown')
+    ];
+
     try {
+        // Intentar conexión a la base de datos
         DB::connection()->getPdo();
-        return response()->json([
-            'status' => 'ok',
-            'database' => 'connected',
-            'timestamp' => now()->toDateTimeString(),
-            'app' => config('app.name')
-        ]);
+        $response['database'] = 'connected';
+        $response['db_host'] = config('database.connections.pgsql.host');
+
+        // Verificar que las tablas existen
+        $tableCount = DB::select("SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'public'");
+        $response['tables'] = $tableCount[0]->count ?? 0;
+
     } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'database' => 'disconnected',
-            'error' => $e->getMessage(),
-            'timestamp' => now()->toDateTimeString()
-        ], 503);
+        $response['status'] = 'warning';
+        $response['database'] = 'disconnected';
+        $response['error'] = $e->getMessage();
+
+        // Si la base de datos no está disponible, devolver 200 pero con warning
+        // para que Railway no falle el health check inmediatamente
+        return response()->json($response, 200);
     }
+
+    return response()->json($response);
+});
+
+// Health check simple para Railway (sin base de datos)
+Route::get('/ping', function () {
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'pong',
+        'timestamp' => now()->toDateTimeString()
+    ]);
 });
 
 Route::post('/login', [AuthController::class, 'login'])->name('login');

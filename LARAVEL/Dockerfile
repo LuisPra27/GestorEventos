@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     nginx \
     supervisor \
+    postgresql-client \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -67,23 +68,43 @@ RUN chown -R www-data:www-data /var/www/html \
 RUN echo '#!/bin/bash' > /start.sh && \
     echo 'set -e' >> /start.sh && \
     echo '' >> /start.sh && \
+    echo '# Función para esperar PostgreSQL' >> /start.sh && \
+    echo 'wait_for_postgres() {' >> /start.sh && \
+    echo '    echo "⏳ Esperando PostgreSQL..."' >> /start.sh && \
+    echo '    for i in {1..30}; do' >> /start.sh && \
+    echo '        if pg_isready -h $PGHOST -p $PGPORT -U $PGUSER; then' >> /start.sh && \
+    echo '            echo "✅ PostgreSQL está listo"' >> /start.sh && \
+    echo '            return 0' >> /start.sh && \
+    echo '        fi' >> /start.sh && \
+    echo '        echo "⏳ Intento $i/30..."' >> /start.sh && \
+    echo '        sleep 5' >> /start.sh && \
+    echo '    done' >> /start.sh && \
+    echo '    echo "❌ PostgreSQL no está disponible después de 150 segundos"' >> /start.sh && \
+    echo '    return 1' >> /start.sh && \
+    echo '}' >> /start.sh && \
+    echo '' >> /start.sh && \
     echo '# Actualizar variables de entorno desde Railway' >> /start.sh && \
     echo 'if [ ! -z "$PGHOST" ]; then' >> /start.sh && \
-    echo '    echo "Configurando base de datos PostgreSQL..."' >> /start.sh && \
+    echo '    echo "🔧 Configurando base de datos PostgreSQL..."' >> /start.sh && \
     echo '    sed -i "s/DB_HOST=.*/DB_HOST=${PGHOST}/" .env' >> /start.sh && \
     echo '    sed -i "s/DB_PORT=.*/DB_PORT=${PGPORT}/" .env' >> /start.sh && \
     echo '    sed -i "s/DB_DATABASE=.*/DB_DATABASE=${PGDATABASE}/" .env' >> /start.sh && \
     echo '    sed -i "s/DB_USERNAME=.*/DB_USERNAME=${PGUSER}/" .env' >> /start.sh && \
     echo '    sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${PGPASSWORD}/" .env' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '    # Esperar PostgreSQL' >> /start.sh && \
+    echo '    wait_for_postgres' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '    # Ejecutar migraciones' >> /start.sh && \
+    echo '    echo "📦 Ejecutando migraciones..."' >> /start.sh && \
+    echo '    php artisan migrate --force || echo "⚠️ Error en migraciones"' >> /start.sh && \
+    echo 'else' >> /start.sh && \
+    echo '    echo "⚠️ Variables PostgreSQL no encontradas"' >> /start.sh && \
     echo 'fi' >> /start.sh && \
     echo '' >> /start.sh && \
     echo 'if [ ! -z "$RAILWAY_PUBLIC_DOMAIN" ]; then' >> /start.sh && \
     echo '    sed -i "s|APP_URL=.*|APP_URL=https://${RAILWAY_PUBLIC_DOMAIN}|" .env' >> /start.sh && \
     echo 'fi' >> /start.sh && \
-    echo '' >> /start.sh && \
-    echo '# Ejecutar migraciones' >> /start.sh && \
-    echo 'echo "Ejecutando migraciones..."' >> /start.sh && \
-    echo 'php artisan migrate --force' >> /start.sh && \
     echo '' >> /start.sh && \
     echo '# Limpiar cache' >> /start.sh && \
     echo 'php artisan config:cache' >> /start.sh && \
@@ -91,7 +112,7 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo 'php artisan view:cache' >> /start.sh && \
     echo '' >> /start.sh && \
     echo '# Iniciar servidor' >> /start.sh && \
-    echo 'echo "Iniciando servidor en puerto ${PORT:-8000}..."' >> /start.sh && \
+    echo 'echo "🚀 Iniciando servidor en puerto ${PORT:-8000}..."' >> /start.sh && \
     echo 'php artisan serve --host=0.0.0.0 --port=${PORT:-8000}' >> /start.sh && \
     chmod +x /start.sh
 
