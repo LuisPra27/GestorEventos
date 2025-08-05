@@ -1116,19 +1116,15 @@
 
         // Función para verificar si el rol del usuario actual ha cambiado
         async function checkCurrentUserRole() {
-            console.log('🔍 Verificando rol del usuario...', currentUser);
+            console.log('🔍 Verificando rol del usuario en segundo plano...', currentUser);
             
             if (!currentUser || !currentUser.id) {
                 console.warn('⚠️ No hay usuario actual o ID');
                 return;
             }
             
-            // Actualizar indicador visual
+            // Verificación silenciosa - sin indicadores visuales para el usuario
             const statusElement = document.getElementById('roleCheckStatus');
-            if (statusElement) {
-                statusElement.innerHTML = '<i class="fas fa-sync fa-spin"></i> Verificando...';
-                statusElement.style.color = '#ff9800';
-            }
             
             try {
                 console.log('📡 Haciendo petición a API para usuario:', currentUser.id);
@@ -1167,17 +1163,8 @@
                                 nuevo: newRole
                             });
                             
-                            // Mostrar alerta visual inmediata
-                            if (statusElement) {
-                                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ¡ROL CAMBIADO!';
-                                statusElement.style.color = '#ff0000';
-                                statusElement.style.fontWeight = 'bold';
-                            }
-                            
-                            // Esperar un momento antes del logout para que el usuario vea el mensaje
-                            setTimeout(() => {
-                                forceLogout(`Tu rol ha sido cambiado a ${newRole}. Debes iniciar sesión nuevamente.`);
-                            }, 1000);
+                            // Logout inmediato sin indicadores visuales
+                            forceLogout(`Tu rol ha sido cambiado a ${newRole}. Debes iniciar sesión nuevamente.`);
                             return;
                         }
                         
@@ -1191,38 +1178,25 @@
                         // Actualizar datos del usuario en localStorage si han cambiado
                         if (serverUser.nombre !== currentUser.nombre || 
                             serverUser.email !== currentUser.email) {
-                            console.log('📝 Actualizando datos del usuario');
+                            console.log('📝 Actualizando datos del usuario en segundo plano');
                             currentUser.nombre = serverUser.nombre;
                             currentUser.email = serverUser.email;
                             localStorage.setItem('user', JSON.stringify(currentUser));
                             document.getElementById('userName').textContent = currentUser.nombre;
                         }
                         
-                        // Actualizar indicador visual - todo OK
-                        if (statusElement) {
-                            statusElement.innerHTML = '<i class="fas fa-shield-alt"></i> Sesión Protegida';
-                            statusElement.style.color = '#4CAF50';
-                        }
-                        
-                        console.log('✅ Verificación completada - Usuario OK');
+                        // Verificación completada silenciosamente
+                        console.log('✅ Verificación completada en segundo plano - Usuario OK');
                     } else {
                         console.error('❌ Respuesta de API sin datos válidos:', data);
                     }
                 } else {
                     console.error('❌ Error en respuesta de API:', response.status);
-                    // Error de servidor, mostrar advertencia pero no forzar logout
-                    if (statusElement) {
-                        statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error de verificación';
-                        statusElement.style.color = '#f44336';
-                    }
+                    // Error de servidor, continuar sin notificar al usuario
                 }
             } catch (error) {
-                console.error('💥 Error en verificación de rol:', error);
-                // En caso de error de red, mostrar advertencia pero no forzar logout
-                if (statusElement) {
-                    statusElement.innerHTML = '<i class="fas fa-wifi"></i> Sin conexión';
-                    statusElement.style.color = '#f44336';
-                }
+                console.error('💥 Error en verificación de rol (silencioso):', error);
+                // En caso de error de red, continuar sin notificar al usuario
             }
         }
 
@@ -1283,16 +1257,16 @@
             // Cargar datos iniciales
             loadAllData();
             
-            // Iniciar verificación periódica del rol (cada 5 segundos para detección rápida)
-            roleCheckInterval = setInterval(checkCurrentUserRole, 5000);
+            // Iniciar verificación periódica del rol (cada 30 segundos en segundo plano)
+            roleCheckInterval = setInterval(checkCurrentUserRole, 30000);
             
             // Iniciar polling de datos (cada 30 segundos)
             startDataPolling();
             
-            // Verificación inicial después de 2 segundos
-            setTimeout(checkCurrentUserRole, 2000);
+            // Verificación inicial después de 5 segundos
+            setTimeout(checkCurrentUserRole, 5000);
             
-            console.log('🔄 Sistema de verificación de roles iniciado (cada 5 segundos)');
+            console.log('🔄 Sistema de verificación de roles iniciado en segundo plano (cada 30 segundos)');
             console.log('📊 Sistema de polling de datos iniciado (cada 30 segundos)');
         });
 
